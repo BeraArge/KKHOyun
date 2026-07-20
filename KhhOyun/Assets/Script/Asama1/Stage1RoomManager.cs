@@ -1,7 +1,8 @@
-using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Stage1RoomManager : MonoBehaviour
 {
@@ -34,94 +35,172 @@ public class Stage1RoomManager : MonoBehaviour
     public int requiredCount = 2;
     public int currentRequiredCount = 0;
 
-    private bool pajamaSelected = false;
-    private bool toothbrushSelected = false;
-    private bool toySelected = false;
-    private bool stageCompleted = false;
-    private bool toyRemovedFromBag = false;
+    [Header("Aþama Geçiþi")]
+    [SerializeField] private int stageNumber = 1;
+    [SerializeField] private string mapSceneName = "Map";
+    [SerializeField] private float mapReturnDelay = 0.4f;
+
+    private bool pajamaSelected;
+    private bool toothbrushSelected;
+    private bool toySelected;
+    private bool stageCompleted;
+    private bool toyRemovedFromBag;
+    private bool isReturningToMap;
 
     private void Start()
     {
         if (messageText != null)
-            messageText.text = "Merhaba! Bugün hastane için çantaný hazýrlayacaðýz.";
+        {
+            messageText.text =
+                "Merhaba! Bugün hastane için çantaný hazýrlayacaðýz.";
+        }
 
         HideSlot(pajamaSlotImage);
         HideSlot(toothbrushSlotImage);
         HideSlot(toySlotImage);
     }
 
-    public void SelectItem(string itemName, Image clickedImage = null)
+    public void SelectItem(
+        string itemName,
+        Image clickedImage = null
+    )
     {
-        if (stageCompleted)
+        if (stageCompleted || isReturningToMap)
+        {
             return;
+        }
 
         switch (itemName)
         {
             case "pijama":
-                if (!pajamaSelected)
-                {
-                    pajamaSelected = true;
-                    AddRequiredItem(pajamaSlotImage, pajamaSprite, pajamaSlotTarget, clickedImage);
-                }
+                SelectPajama(clickedImage);
                 break;
 
             case "disfircasi":
-                if (!toothbrushSelected)
-                {
-                    toothbrushSelected = true;
-                    AddRequiredItem(toothbrushSlotImage, toothbrushSprite, toothbrushSlotTarget, clickedImage);
-                }
+                SelectToothbrush(clickedImage);
                 break;
 
             case "ayicik":
-                if (!toySelected)
-                {
-                    toySelected = true;
-                    score += 10;
-                    AddOptionalToy(clickedImage);
-                }
+                SelectToy(clickedImage);
                 break;
 
             case "cips":
                 score -= 10;
-                warningPopup.Show("Þimdilik abur cubur almamalýsýn.");
+                ShowWarning(
+                    "Þimdilik abur cubur almamalýsýn."
+                );
                 break;
 
             case "soda":
                 score -= 10;
-                warningPopup.Show("Gazlý içecekler ameliyat öncesinde uygun deðildir.");
+                ShowWarning(
+                    "Gazlý içecekler ameliyat öncesinde uygun deðildir."
+                );
                 break;
 
             case "oyuncaklar":
                 score -= 5;
-                warningPopup.Show("Gereksiz oyuncaklarý yanýna almana gerek yok.");
+                ShowWarning(
+                    "Gereksiz oyuncaklarý yanýna almana gerek yok."
+                );
                 break;
 
             case "yemek":
-                warningPopup.Show("Ameliyat öncesinde yemek yasak olabilir. Doktorunu dinlemelisin.");
-                RestartStage();
-                break;
+                StartCoroutine(
+                    RestartStageRoutine(
+                        "Ameliyat öncesinde yemek yasak olabilir. " +
+                        "Doktorunu dinlemelisin."
+                    )
+                );
+                return;
 
             case "su":
-                warningPopup.Show("Ameliyat öncesinde su içmek yasak olabilir. Doktorunu dinlemelisin.");
-                RestartStage();
+                StartCoroutine(
+                    RestartStageRoutine(
+                        "Ameliyat öncesinde su içmek yasak olabilir. " +
+                        "Doktorunu dinlemelisin."
+                    )
+                );
+                return;
+
+            default:
+                Debug.LogWarning(
+                    $"Tanýmlanmayan eþya: {itemName}"
+                );
                 break;
         }
 
         CheckCompletion();
     }
 
-    private void AddRequiredItem(Image slotImage, Sprite itemSprite, RectTransform slotTarget, Image clickedImage)
+    private void SelectPajama(Image clickedImage)
+    {
+        if (pajamaSelected)
+        {
+            return;
+        }
+
+        pajamaSelected = true;
+
+        AddRequiredItem(
+            pajamaSlotImage,
+            pajamaSprite,
+            pajamaSlotTarget,
+            clickedImage
+        );
+    }
+
+    private void SelectToothbrush(Image clickedImage)
+    {
+        if (toothbrushSelected)
+        {
+            return;
+        }
+
+        toothbrushSelected = true;
+
+        AddRequiredItem(
+            toothbrushSlotImage,
+            toothbrushSprite,
+            toothbrushSlotTarget,
+            clickedImage
+        );
+    }
+
+    private void SelectToy(Image clickedImage)
+    {
+        if (toySelected)
+        {
+            return;
+        }
+
+        toySelected = true;
+        score += 10;
+
+        AddOptionalToy(clickedImage);
+    }
+
+    private void AddRequiredItem(
+        Image slotImage,
+        Sprite itemSprite,
+        RectTransform slotTarget,
+        Image clickedImage
+    )
     {
         score += 10;
         currentRequiredCount++;
 
-        if (clickedImage != null && flyAnimator != null)
+        if (
+            clickedImage != null &&
+            flyAnimator != null &&
+            slotTarget != null
+        )
         {
-            flyAnimator.FlyToSlot(clickedImage, slotTarget, () =>
-            {
-                ShowSlot(slotImage, itemSprite);
-            });
+            flyAnimator.FlyToSlot(
+                clickedImage,
+                slotTarget,
+                () => ShowSlot(slotImage, itemSprite)
+            );
         }
         else
         {
@@ -131,12 +210,17 @@ public class Stage1RoomManager : MonoBehaviour
 
     private void AddOptionalToy(Image clickedImage)
     {
-        if (clickedImage != null && flyAnimator != null)
+        if (
+            clickedImage != null &&
+            flyAnimator != null &&
+            toySlotTarget != null
+        )
         {
-            flyAnimator.FlyToSlot(clickedImage, toySlotTarget, () =>
-            {
-                ShowSlot(toySlotImage, toySprite);
-            });
+            flyAnimator.FlyToSlot(
+                clickedImage,
+                toySlotTarget,
+                () => ShowSlot(toySlotImage, toySprite)
+            );
         }
         else
         {
@@ -144,10 +228,15 @@ public class Stage1RoomManager : MonoBehaviour
         }
     }
 
-    private void ShowSlot(Image slotImage, Sprite sprite)
+    private void ShowSlot(
+        Image slotImage,
+        Sprite sprite
+    )
     {
         if (slotImage == null || sprite == null)
+        {
             return;
+        }
 
         slotImage.sprite = sprite;
         slotImage.color = Color.white;
@@ -157,43 +246,129 @@ public class Stage1RoomManager : MonoBehaviour
     private void HideSlot(Image slotImage)
     {
         if (slotImage == null)
+        {
             return;
+        }
 
         slotImage.enabled = false;
     }
 
     private void CheckCompletion()
     {
-        if (!stageCompleted && currentRequiredCount >= requiredCount)
+        if (
+            stageCompleted ||
+            currentRequiredCount < requiredCount
+        )
         {
-            stageCompleted = true;
-            StartCoroutine(CompleteStageRoutine());
+            return;
         }
+
+        stageCompleted = true;
+
+        StartCoroutine(
+            CompleteStageRoutine()
+        );
     }
 
     private IEnumerator CompleteStageRoutine()
     {
-        yield return new WaitForSeconds(0.7f);
+        yield return new WaitForSecondsRealtime(0.7f);
 
-        if (toySelected && !toyRemovedFromBag)
+        if (
+            toySelected &&
+            !toyRemovedFromBag
+        )
         {
             toyRemovedFromBag = true;
 
             if (toySlotImage != null)
+            {
                 toySlotImage.enabled = false;
+            }
 
+            if (warningPopup != null)
+            {
+                yield return warningPopup.ShowAndWaitForClose(
+                    "Oyuncaðýný yanýna alabilirsin.\n" +
+                    "Ama o ameliyata giremez,\n" +
+                    "odanda seni bekleyecek."
+                );
+            }
+        }
+
+        if (warningPopup != null)
+        {
             yield return warningPopup.ShowAndWaitForClose(
-                "Oyuncaðýný yanýna alabilirsin.\nAma o ameliyata giremez,\nodanda seni bekleyecek."
+                "Harikasýn!\nÇantan hazýr."
             );
         }
 
-        yield return warningPopup.ShowAndWaitForClose(
-            "Harikasýn!\nÇantan hazýr."
+        CompleteStageAndReturnToMap();
+    }
+
+    private void CompleteStageAndReturnToMap()
+    {
+        if (isReturningToMap)
+        {
+            return;
+        }
+
+        isReturningToMap = true;
+
+        StageProgress.CompleteStage(stageNumber);
+
+        StartCoroutine(
+            ReturnToMapRoutine()
         );
     }
 
-    private void RestartStage()
+    private IEnumerator ReturnToMapRoutine()
     {
-        Debug.Log("Oyun baþa dönecek.");
+        yield return new WaitForSecondsRealtime(
+            mapReturnDelay
+        );
+
+        if (
+            string.IsNullOrWhiteSpace(mapSceneName)
+        )
+        {
+            Debug.LogError(
+                "Map Scene Name alaný boþ."
+            );
+
+            yield break;
+        }
+
+        SceneManager.LoadScene(mapSceneName);
+    }
+
+    private IEnumerator RestartStageRoutine(
+        string warningMessage
+    )
+    {
+        stageCompleted = true;
+
+        if (warningPopup != null)
+        {
+            yield return warningPopup.ShowAndWaitForClose(
+                warningMessage
+            );
+        }
+
+        SceneManager.LoadScene(
+            SceneManager.GetActiveScene().name
+        );
+    }
+
+    private void ShowWarning(string message)
+    {
+        if (warningPopup != null)
+        {
+            warningPopup.Show(message);
+        }
+        else
+        {
+            Debug.LogWarning(message);
+        }
     }
 }

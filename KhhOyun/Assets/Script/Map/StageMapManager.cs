@@ -5,8 +5,8 @@ using UnityEngine.SceneManagement;
 
 public class StageMapManager : MonoBehaviour
 {
-    [Header("Mevcut Açýk Aþama")]
-    [SerializeField] private int currentStage = 1;
+    [Header("Loading Sahnesi")]
+    [SerializeField] private string loadingSceneName = "LoadingScene";
 
     [Header("Panel Yazýlarý")]
     [SerializeField] private TMP_Text messageText;
@@ -16,6 +16,8 @@ public class StageMapManager : MonoBehaviour
     [SerializeField] private WarningPopupUI warningPopup;
 
     private StageMapItem[] stageItems;
+    private int currentStage;
+    private bool isLoadingScene;
 
     private void Start()
     {
@@ -23,36 +25,57 @@ public class StageMapManager : MonoBehaviour
             .OrderBy(x => x.StageNumber)
             .ToArray();
 
+        currentStage = StageProgress.CurrentStage;
+
         RefreshStages();
     }
 
     public void StageClicked(int clickedStage)
     {
+        // Peþ peþe týklamalarý engeller.
+        if (isLoadingScene)
+        {
+            return;
+        }
+
         StageMapItem clickedItem = stageItems
-            .FirstOrDefault(x => x.StageNumber == clickedStage);
+            .FirstOrDefault(
+                x => x.StageNumber == clickedStage
+            );
 
         if (clickedItem == null)
         {
             Debug.LogError(
-                $"{clickedStage}. aþama için StageMapItem bulunamadý."
+                $"{clickedStage}. aþama için " +
+                "StageMapItem bulunamadý."
             );
 
             return;
         }
 
-        // Kilitli aþama.
+        // Henüz açýlmamýþ aþama.
         if (clickedStage > currentStage)
         {
             ShowLockedStageWarning(clickedStage);
             return;
         }
 
-        // Aktif veya daha önce tamamlanan aþamayý aç.
-        LoadStage(clickedItem);
+        /*
+         * Aktif veya daha önce tamamlanmýþ aþama
+         * tekrar açýlabilir.
+         */
+        LoadStageWithLoadingScreen(clickedItem);
     }
 
-    private void LoadStage(StageMapItem stage)
+    private void LoadStageWithLoadingScreen(
+        StageMapItem stage
+    )
     {
+        if (stage == null)
+        {
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(stage.SceneName))
         {
             ShowMessage(
@@ -65,21 +88,67 @@ public class StageMapManager : MonoBehaviour
         if (!Application.CanStreamedLevelBeLoaded(stage.SceneName))
         {
             ShowMessage(
-                $"{stage.SceneName} sahnesi yüklenemiyor.\n" +
-                "Sahneyi Build Profiles içindeki Scene List alanýna ekleyin."
+                "Bu aþamanýn sahnesi henüz kullanýma hazýr deðil."
             );
 
             Debug.LogError(
-                $"'{stage.SceneName}' sahnesi Scene List içerisinde bulunamadý."
+                $"'{stage.SceneName}' sahnesi Build Profiles " +
+                "içindeki Scene List'te bulunamadý."
             );
 
             return;
         }
 
-        SceneManager.LoadScene(stage.SceneName);
+        if (string.IsNullOrWhiteSpace(loadingSceneName))
+        {
+            ShowMessage(
+                "Loading sahnesinin adý ayarlanmamýþ."
+            );
+
+            Debug.LogError(
+                "StageMapManager üzerindeki Loading Scene Name alaný boþ."
+            );
+
+            return;
+        }
+
+        if (!Application.CanStreamedLevelBeLoaded(loadingSceneName))
+        {
+            ShowMessage(
+                "Yükleme ekraný henüz kullanýma hazýr deðil."
+            );
+
+            Debug.LogError(
+                $"'{loadingSceneName}' sahnesi Build Profiles " +
+                "içindeki Scene List'te bulunamadý."
+            );
+
+            return;
+        }
+
+        isLoadingScene = true;
+
+        /*
+         * LoadingScene açýlmadan önce, daha sonra
+         * açýlacak gerçek aþamanýn adýný kaydediyoruz.
+         */
+        LoadingSceneData.SetTargetScene(
+            stage.SceneName
+        );
+
+        Debug.Log(
+            $"LoadingScene açýlýyor. " +
+            $"Hedef aþama: {stage.SceneName}"
+        );
+
+        SceneManager.LoadScene(
+            loadingSceneName
+        );
     }
 
-    private void ShowLockedStageWarning(int clickedStage)
+    private void ShowLockedStageWarning(
+        int clickedStage
+    )
     {
         string warningMessage;
 
@@ -113,22 +182,37 @@ public class StageMapManager : MonoBehaviour
 
     private void RefreshStages()
     {
+        if (stageItems == null)
+        {
+            return;
+        }
+
+        bool allStagesCompleted =
+            StageProgress.HighestCompletedStage >=
+            StageProgress.TotalStageCount;
+
         foreach (StageMapItem stage in stageItems)
         {
-            bool isCompleted =
-                stage.StageNumber < currentStage;
+            bool isCompleted;
+            bool isCurrent;
+            bool isLocked;
 
-            bool isCurrent =
-                stage.StageNumber == currentStage;
-
-            bool isLocked =
-                stage.StageNumber > currentStage;
-
-            if (currentStage > stageItems.Length)
+            if (allStagesCompleted)
             {
                 isCompleted = true;
                 isCurrent = false;
                 isLocked = false;
+            }
+            else
+            {
+                isCompleted =
+                    stage.StageNumber < currentStage;
+
+                isCurrent =
+                    stage.StageNumber == currentStage;
+
+                isLocked =
+                    stage.StageNumber > currentStage;
             }
 
             stage.SetVisualState(
@@ -143,7 +227,11 @@ public class StageMapManager : MonoBehaviour
 
     private void UpdatePanelTexts()
     {
-        if (currentStage > stageItems.Length)
+        bool allStagesCompleted =
+            StageProgress.HighestCompletedStage >=
+            StageProgress.TotalStageCount;
+
+        if (allStagesCompleted)
         {
             if (messageText != null)
             {
@@ -174,7 +262,9 @@ public class StageMapManager : MonoBehaviour
         }
     }
 
-    private string GetInformationMessage(int stageNumber)
+    private string GetInformationMessage(
+        int stageNumber
+    )
     {
         switch (stageNumber)
         {
@@ -222,6 +312,24 @@ public class StageMapManager : MonoBehaviour
     [ContextMenu("Haritayý Yenile")]
     public void RefreshMap()
     {
+        currentStage =
+            StageProgress.CurrentStage;
+
+        isLoadingScene = false;
+
+        RefreshStages();
+    }
+
+    [ContextMenu("Ýlerlemeyi Sýfýrla")]
+    public void ResetSavedProgress()
+    {
+        StageProgress.ResetProgress();
+
+        currentStage =
+            StageProgress.CurrentStage;
+
+        isLoadingScene = false;
+
         RefreshStages();
     }
 }

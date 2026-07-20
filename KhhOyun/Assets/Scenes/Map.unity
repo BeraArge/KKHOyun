@@ -589,7 +589,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa57f49e7141af748b6b025bf652c1a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageMapManager
-  currentStage: 1
+  loadingSceneName: LoadingScreen
   messageText: {fileID: 1132184862}
   taskSubTitleText: {fileID: 385658549}
   warningPopup: {fileID: 1092009063}

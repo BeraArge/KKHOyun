@@ -2,8 +2,7 @@ using UnityEngine;
 
 public static class StageProgress
 {
-    private const string ProgressKey =
-        "HighestCompletedStage";
+    private const string CompletedStageKey = "HighestCompletedStage";
 
     public const int TotalStageCount = 7;
 
@@ -12,45 +11,65 @@ public static class StageProgress
         get
         {
             return Mathf.Clamp(
-                PlayerPrefs.GetInt(ProgressKey, 0),
+                PlayerPrefs.GetInt(CompletedStageKey, 0),
                 0,
                 TotalStageCount
             );
         }
     }
 
-    public static bool CanOpenStage(int stageNumber)
+    public static int CurrentStage
     {
-        return stageNumber <= HighestCompletedStage + 1;
+        get
+        {
+            return HighestCompletedStage + 1;
+        }
     }
 
     public static void CompleteStage(int stageNumber)
     {
-        int completed = HighestCompletedStage;
+        int highestCompleted = HighestCompletedStage;
 
-        if (stageNumber <= completed)
+        // Daha önce tamamlanmýþ bir aþama tekrar oynanýyorsa
+        // ilerleme deðiþmez.
+        if (stageNumber <= highestCompleted)
         {
-            return;
-        }
-
-        // Aþama atlanmasýný engelle.
-        if (stageNumber != completed + 1)
-        {
-            Debug.LogWarning(
-                $"Aþama atlanamaz. Beklenen: {completed + 1}, " +
-                $"Týklanan: {stageNumber}"
+            Debug.Log(
+                $"{stageNumber}. aþama daha önce tamamlanmýþ."
             );
 
             return;
         }
 
-        PlayerPrefs.SetInt(ProgressKey, stageNumber);
+        // Aþama atlamayý engeller.
+        if (stageNumber != highestCompleted + 1)
+        {
+            Debug.LogWarning(
+                $"Aþama sýrasý atlanamaz. " +
+                $"Beklenen aþama: {highestCompleted + 1}, " +
+                $"tamamlanmak istenen aþama: {stageNumber}"
+            );
+
+            return;
+        }
+
+        PlayerPrefs.SetInt(
+            CompletedStageKey,
+            stageNumber
+        );
+
         PlayerPrefs.Save();
+
+        Debug.Log(
+            $"{stageNumber}. aþama tamamlandý ve kaydedildi."
+        );
     }
 
     public static void ResetProgress()
     {
-        PlayerPrefs.DeleteKey(ProgressKey);
+        PlayerPrefs.DeleteKey(CompletedStageKey);
         PlayerPrefs.Save();
+
+        Debug.Log("Aþama ilerlemesi sýfýrlandý.");
     }
 }
