@@ -26,7 +26,6 @@ public class Stage2OrderManager : MonoBehaviour
     public GameObject phaseDContainer;
     public GameObject phaseEContainer;
     public GameObject phaseFContainer;
-    public GameObject phaseGContainer;
     public GameObject phaseHContainer;
 
     [Header("Phase A - Oda Sırası")]
@@ -45,9 +44,6 @@ public class Stage2OrderManager : MonoBehaviour
 
     [Header("Phase F - Yürüyüş")]
     public WalkingPhaseManager walkingPhaseManager;
-
-    [Header("Phase G - Eğitim Videosu")]
-    public EducationVideoManager videoManager;
 
     [Header("Phase H - Beslenme")]
     public FeedingRoomManager feedingRoomManager;
@@ -77,7 +73,7 @@ public class Stage2OrderManager : MonoBehaviour
     private bool stageComplete = false;
     private bool isReturningToMap = false;
 
-    private enum Phase { A, B, C, D, E, F, G, H }
+    private enum Phase { A, B, C, D, E, F, H }
 
     private void Start()
     {
@@ -93,7 +89,6 @@ public class Stage2OrderManager : MonoBehaviour
         if (phaseDContainer != null) phaseDContainer.SetActive(false);
         if (phaseEContainer != null) phaseEContainer.SetActive(false);
         if (phaseFContainer != null) phaseFContainer.SetActive(false);
-        if (phaseGContainer != null) phaseGContainer.SetActive(false);
         if (phaseHContainer != null) phaseHContainer.SetActive(false);
 
         foreach (var img in roomSlotImages)
@@ -139,7 +134,6 @@ public class Stage2OrderManager : MonoBehaviour
         if (phaseDContainer != null) phaseDContainer.SetActive(target == Phase.D);
         if (phaseEContainer != null) phaseEContainer.SetActive(target == Phase.E);
         if (phaseFContainer != null) phaseFContainer.SetActive(target == Phase.F);
-        if (phaseGContainer != null) phaseGContainer.SetActive(target == Phase.G);
         if (phaseHContainer != null) phaseHContainer.SetActive(target == Phase.H);
 
         if (heartDisplay != null) heartDisplay.UpdateHearts(score);
@@ -157,10 +151,6 @@ public class Stage2OrderManager : MonoBehaviour
             case Phase.F:
                 if (walkingPhaseManager != null) walkingPhaseManager.StartPhase();
                 else Debug.LogError("[S2OM] walkingPhaseManager NULL — Inspector'da bağla!");
-                break;
-            case Phase.G:
-                if (videoManager != null) videoManager.StartPhase();
-                else Debug.LogError("[S2OM] videoManager NULL — Inspector'da bağla!");
                 break;
         }
     }
@@ -351,19 +341,8 @@ public class Stage2OrderManager : MonoBehaviour
 
     public void OnPhaseFComplete()
     {
-        currentPhase = Phase.G;
-        if (phaseFContainer != null) phaseFContainer.SetActive(false);
-        if (phaseGContainer != null) phaseGContainer.SetActive(true);
-        if (videoManager != null) videoManager.StartPhase();
-        else Debug.LogError("[S2OM] videoManager NULL — Inspector'da bağla!");
-    }
-
-    // ─── BÖLÜM G callback ────────────────────────────────────────────────────
-
-    public void OnPhaseGComplete()
-    {
         currentPhase = Phase.H;
-        if (phaseGContainer != null) phaseGContainer.SetActive(false);
+        if (phaseFContainer != null) phaseFContainer.SetActive(false);
         if (phaseHContainer != null) phaseHContainer.SetActive(true);
         if (messageText != null)
             messageText.text = "Şimdi ağızdan beslenmeye başlayabilirsin!";

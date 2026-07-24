@@ -3235,7 +3235,6 @@ MonoBehaviour:
   phaseDContainer: {fileID: 1149950405}
   phaseEContainer: {fileID: 627363099}
   phaseFContainer: {fileID: 2109178704}
-  phaseGContainer: {fileID: 1868673294}
   phaseHContainer: {fileID: 318571381}
   correctRoomOrder:
   - kayit
@@ -3256,7 +3255,6 @@ MonoBehaviour:
   stretcherPhaseManager: {fileID: 1149950407}
   recoveryRoomManager: {fileID: 627363101}
   walkingPhaseManager: {fileID: 2109178706}
-  videoManager: {fileID: 1868673296}
   feedingRoomManager: {fileID: 318571383}
   heartDisplay: {fileID: 0}
   score: 0
@@ -3264,7 +3262,7 @@ MonoBehaviour:
   mapSceneName: Map
   mapReturnDelay: 0.4
   debugSkipEnabled: 1
-  debugStartPhase: 0
+  debugStartPhase: 5
 --- !u!1 &718081933
 GameObject:
   m_ObjectHideFlags: 0
@@ -8896,6 +8894,8 @@ MonoBehaviour:
   videoPlayer: {fileID: 1212314843}
   clip: {fileID: 32900000, guid: 64da625fdeb915f43a2e3ae6a77a2898, type: 3}
   dayTitleText: {fileID: 291761902}
+  subscribed: 0
+  completed: 0
 --- !u!1 &1875214824
 GameObject:
   m_ObjectHideFlags: 0
