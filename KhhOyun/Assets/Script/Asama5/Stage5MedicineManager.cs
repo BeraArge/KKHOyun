@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Stage5MedicineManager : MonoBehaviour
@@ -30,10 +31,21 @@ public class Stage5MedicineManager : MonoBehaviour
     public int requiredCount = 3;
     public int currentRequiredCount = 0;
 
+    [Header("Aþama Geçiþi")]
+    [SerializeField]
+    private int stageNumber = 5;
+
+    [SerializeField]
+    private string mapSceneName = "Map";
+
+    [SerializeField]
+    private float mapReturnDelay = 0.4f;
+
     private bool vitaminSelected = false;
     private bool heartMedicineSelected = false;
     private bool syrupSelected = false;
     private bool stageCompleted = false;
+    private bool isReturningToMap = false;
 
     private void Start()
     {
@@ -42,44 +54,87 @@ public class Stage5MedicineManager : MonoBehaviour
         HideSlot(syrupSlotImage);
     }
 
-    public void SelectMedicine(string medicineName, Image clickedImage = null)
+    public void SelectMedicine(
+        string medicineName,
+        Image clickedImage = null
+    )
     {
-        if (stageCompleted)
+        if (
+            stageCompleted ||
+            isReturningToMap
+        )
+        {
             return;
+        }
 
         switch (medicineName)
         {
             case "vitamin":
+
                 if (!vitaminSelected)
                 {
                     vitaminSelected = true;
-                    AddCorrectMedicine(vitaminSlotImage, vitaminSprite, vitaminSlotTarget, clickedImage);
+
+                    AddCorrectMedicine(
+                        vitaminSlotImage,
+                        vitaminSprite,
+                        vitaminSlotTarget,
+                        clickedImage
+                    );
                 }
+
                 break;
 
             case "kalpilaci":
+
                 if (!heartMedicineSelected)
                 {
                     heartMedicineSelected = true;
-                    AddCorrectMedicine(heartMedicineSlotImage, heartMedicineSprite, heartMedicineSlotTarget, clickedImage);
+
+                    AddCorrectMedicine(
+                        heartMedicineSlotImage,
+                        heartMedicineSprite,
+                        heartMedicineSlotTarget,
+                        clickedImage
+                    );
                 }
+
                 break;
 
             case "surup":
+
                 if (!syrupSelected)
                 {
                     syrupSelected = true;
-                    AddCorrectMedicine(syrupSlotImage, syrupSprite, syrupSlotTarget, clickedImage);
+
+                    AddCorrectMedicine(
+                        syrupSlotImage,
+                        syrupSprite,
+                        syrupSlotTarget,
+                        clickedImage
+                    );
                 }
+
                 break;
 
             case "baskailac":
+
                 score -= 20;
-                warningPopup.Show("Bu ilaç sana ait deðil.\nBaþkasýnýn ilacýný kullanmamalýsýn!");
+
+                ShowWarning(
+                    "Bu ilaç sana ait deðil.\n" +
+                    "Baþkasýnýn ilacýný kullanmamalýsýn!"
+                );
+
                 break;
 
             default:
-                Debug.LogWarning("Tanýmsýz ilaç adý: " + medicineName);
+
+                Debug.LogWarning(
+                    "Tanýmsýz ilaç adý: " +
+                    medicineName
+                );
+
                 break;
         }
 
@@ -96,23 +151,45 @@ public class Stage5MedicineManager : MonoBehaviour
         score += 10;
         currentRequiredCount++;
 
-        if (clickedImage != null && flyAnimator != null)
+        if (
+            clickedImage != null &&
+            flyAnimator != null &&
+            slotTarget != null
+        )
         {
-            flyAnimator.FlyToSlot(clickedImage, slotTarget, () =>
-            {
-                ShowSlot(slotImage, medicineSprite);
-            });
+            flyAnimator.FlyToSlot(
+                clickedImage,
+                slotTarget,
+                () =>
+                {
+                    ShowSlot(
+                        slotImage,
+                        medicineSprite
+                    );
+                }
+            );
         }
         else
         {
-            ShowSlot(slotImage, medicineSprite);
+            ShowSlot(
+                slotImage,
+                medicineSprite
+            );
         }
     }
 
-    private void ShowSlot(Image slotImage, Sprite sprite)
+    private void ShowSlot(
+        Image slotImage,
+        Sprite sprite
+    )
     {
-        if (slotImage == null || sprite == null)
+        if (
+            slotImage == null ||
+            sprite == null
+        )
+        {
             return;
+        }
 
         slotImage.sprite = sprite;
         slotImage.color = Color.white;
@@ -120,27 +197,138 @@ public class Stage5MedicineManager : MonoBehaviour
         slotImage.preserveAspect = true;
     }
 
-    private void HideSlot(Image slotImage)
+    private void HideSlot(
+        Image slotImage
+    )
     {
         if (slotImage == null)
+        {
             return;
+        }
 
         slotImage.enabled = false;
     }
 
     private void CheckCompletion()
     {
-        if (!stageCompleted && currentRequiredCount >= requiredCount)
+        if (
+            stageCompleted ||
+            currentRequiredCount <
+            requiredCount
+        )
         {
-            stageCompleted = true;
-            StartCoroutine(CompleteStageRoutine());
+            return;
         }
+
+        stageCompleted = true;
+
+        StartCoroutine(
+            CompleteStageRoutine()
+        );
     }
 
     private IEnumerator CompleteStageRoutine()
     {
-        yield return new WaitForSeconds(0.7f);
+        yield return new WaitForSecondsRealtime(
+            0.7f
+        );
 
-        warningPopup.Show("Harika!\nDoðru ilaçlarý ilaç kutuna yerleþtirdin.");
+        if (warningPopup != null)
+        {
+            yield return warningPopup
+                .ShowAndWaitForClose(
+                    "Harika!\n" +
+                    "Doðru ilaçlarý ilaç kutuna yerleþtirdin."
+                );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Harika! Doðru ilaçlarý ilaç kutuna yerleþtirdin."
+            );
+        }
+
+        Debug.Log(
+            "[Stage5MedicineManager] Aþama 5 tamamlandý. Skor: " +
+            score
+        );
+
+        CompleteStageAndReturnToMap();
+    }
+
+    private void CompleteStageAndReturnToMap()
+    {
+        if (isReturningToMap)
+        {
+            return;
+        }
+
+        isReturningToMap = true;
+
+        StageProgress.CompleteStage(
+            stageNumber
+        );
+
+        StartCoroutine(
+            ReturnToMapRoutine()
+        );
+    }
+
+    private IEnumerator ReturnToMapRoutine()
+    {
+        yield return new WaitForSecondsRealtime(
+            mapReturnDelay
+        );
+
+        if (
+            string.IsNullOrWhiteSpace(
+                mapSceneName
+            )
+        )
+        {
+            Debug.LogError(
+                "[Stage5MedicineManager] Map Scene Name alaný boþ."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        if (
+            !Application.CanStreamedLevelBeLoaded(
+                mapSceneName
+            )
+        )
+        {
+            Debug.LogError(
+                $"[Stage5MedicineManager] '{mapSceneName}' sahnesi " +
+                "Build Profiles içindeki Scene List'te bulunamadý."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        SceneManager.LoadScene(
+            mapSceneName
+        );
+    }
+
+    private void ShowWarning(
+        string message
+    )
+    {
+        if (warningPopup != null)
+        {
+            warningPopup.Show(
+                message
+            );
+        }
+        else
+        {
+            Debug.LogWarning(
+                message
+            );
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Stage6Manager : MonoBehaviour
@@ -242,6 +243,16 @@ public class Stage6Manager : MonoBehaviour
     public GameObject finalCongratulationsPanel;
     public GameObject familyCharacters;
 
+    [Header("Aþama Geçiþi")]
+    [SerializeField]
+    private int stageNumber = 6;
+
+    [SerializeField]
+    private string mapSceneName = "Map";
+
+    [SerializeField]
+    private float mapReturnDelay = 0.4f;
+
     // --------------------------------------------------
     // PUAN VE KONTROL
     // --------------------------------------------------
@@ -258,6 +269,8 @@ public class Stage6Manager : MonoBehaviour
     private bool balanceSuccessConfirmed;
     private bool balanceRetryConfirmed;
     private bool balanceMoveInProgress;
+    private bool finalSuccessConfirmed;
+    private bool isReturningToMap;
 
     private Coroutine mainSequence;
     private Coroutine chestCountdownCoroutine;
@@ -287,6 +300,8 @@ public class Stage6Manager : MonoBehaviour
         balanceSuccessConfirmed = false;
         balanceRetryConfirmed = false;
         balanceMoveInProgress = false;
+        finalSuccessConfirmed = false;
+        isReturningToMap = false;
 
         HideAllGameplayObjects();
 
@@ -448,7 +463,10 @@ public class Stage6Manager : MonoBehaviour
         Stage6ChoiceButton clickedButton
     )
     {
-        if (inputLocked)
+        if (
+            inputLocked ||
+            isReturningToMap
+        )
         {
             return;
         }
@@ -2107,8 +2125,93 @@ public class Stage6Manager : MonoBehaviour
 
         UpdateTopPanelsForCompleted();
 
+        finalSuccessConfirmed = false;
+
         Debug.Log(
-            "6. aþama tamamlandý."
+            "6. aþama tamamlandý. Final baþarý panelindeki buton bekleniyor."
+        );
+
+        // Son baþarý panelindeki Tamam butonuna basýlmasýný bekler.
+        yield return new WaitUntil(
+            () => finalSuccessConfirmed
+        );
+
+        CompleteStageAndReturnToMap();
+    }
+
+    /// <summary>
+    /// sonsecimaferin panelindeki Tamam butonunun
+    /// OnClick olayýna atanmalýdýr.
+    /// </summary>
+    public void ConfirmFinalSuccess()
+    {
+        if (
+            currentStep != Stage6Step.Tamamlandi ||
+            isReturningToMap
+        )
+        {
+            return;
+        }
+
+        finalSuccessConfirmed = true;
+    }
+
+    private void CompleteStageAndReturnToMap()
+    {
+        if (isReturningToMap)
+        {
+            return;
+        }
+
+        isReturningToMap = true;
+        inputLocked = true;
+
+        StageProgress.CompleteStage(
+            stageNumber
+        );
+
+        StartCoroutine(
+            ReturnToMapRoutine()
+        );
+    }
+
+    private IEnumerator ReturnToMapRoutine()
+    {
+        yield return new WaitForSecondsRealtime(
+            mapReturnDelay
+        );
+
+        if (
+            string.IsNullOrWhiteSpace(
+                mapSceneName
+            )
+        )
+        {
+            Debug.LogError(
+                "Stage6Manager: Map Scene Name alaný boþ."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        if (
+            !Application.CanStreamedLevelBeLoaded(
+                mapSceneName
+            )
+        )
+        {
+            Debug.LogError(
+                $"Stage6Manager: '{mapSceneName}' sahnesi " +
+                "Build Profiles içindeki Scene List'te bulunamadý."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        SceneManager.LoadScene(
+            mapSceneName
         );
     }
 

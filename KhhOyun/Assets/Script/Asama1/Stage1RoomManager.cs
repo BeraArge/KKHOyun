@@ -9,6 +9,18 @@ public class Stage1RoomManager : MonoBehaviour
     [Header("UI")]
     public TMP_Text messageText;
 
+    [Header("Eðitim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    public EducationPanelUI educationPanelUI;
+
+    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [SerializeField]
+    private string educationStepId = "asama1_egitim";
+
+    [Header("Sahne Ýçeriði")]
+    [Tooltip("Eðitim tamamlanana kadar kapalý kalacak Sahne objesi.")]
+    public GameObject sceneContent;
+
     [Header("Popup")]
     public WarningPopupUI warningPopup;
 
@@ -46,26 +58,79 @@ public class Stage1RoomManager : MonoBehaviour
     private bool stageCompleted;
     private bool toyRemovedFromBag;
     private bool isReturningToMap;
+    private bool educationIsOpen;
 
     private void Start()
     {
+        HideSlot(pajamaSlotImage);
+        HideSlot(toothbrushSlotImage);
+        HideSlot(toySlotImage);
+
+        // Eðitim bitene kadar oyun sahnesi gizli kalýr.
+        if (sceneContent != null)
+        {
+            sceneContent.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Stage1RoomManager: Scene Content alanýna Sahne objesi atanmadý."
+            );
+        }
+
+        StartCoroutine(
+            StartEducationRoutine()
+        );
+    }
+
+    private IEnumerator StartEducationRoutine()
+    {
+        educationIsOpen = true;
+
+        if (messageText != null)
+        {
+            messageText.text =
+                "Önce kýsa eðitimi dinleyelim.";
+        }
+
+        if (educationPanelUI != null)
+        {
+            yield return educationPanelUI
+                .ShowStepAndWaitForClose(
+                    educationStepId
+                );
+        }
+        else
+        {
+            Debug.LogError(
+                "Stage1RoomManager: Education Panel UI alanýna " +
+                "EducationPanel üzerindeki EducationPanelUI bileþeni atanmadý."
+            );
+        }
+
+        educationIsOpen = false;
+
+        // Devam butonuna basýlýp eðitim paneli kapandýktan sonra
+        // asýl oyun sahnesi görünür hâle gelir.
+        if (sceneContent != null)
+        {
+            sceneContent.SetActive(true);
+        }
+
         if (messageText != null)
         {
             messageText.text =
                 "Merhaba! Bugün hastane için çantaný hazýrlayacaðýz.";
         }
 
-        HideSlot(pajamaSlotImage);
-        HideSlot(toothbrushSlotImage);
-        HideSlot(toySlotImage);
+        Debug.Log(
+            "Aþama 1 eðitimi tamamlandý. Oyun baþladý."
+        );
     }
 
-    public void SelectItem(
-        string itemName,
-        Image clickedImage = null
-    )
+    public void SelectItem(string itemName, Image clickedImage = null)
     {
-        if (stageCompleted || isReturningToMap)
+        if (educationIsOpen || stageCompleted || isReturningToMap)
         {
             return;
         }
@@ -86,46 +151,34 @@ public class Stage1RoomManager : MonoBehaviour
 
             case "cips":
                 score -= 10;
-                ShowWarning(
-                    "Þimdilik abur cubur almamalýsýn."
-                );
+                ShowWarning("Þimdilik abur cubur almamalýsýn.");
                 break;
 
             case "soda":
                 score -= 10;
-                ShowWarning(
-                    "Gazlý içecekler ameliyat öncesinde uygun deðildir."
-                );
+                ShowWarning("Gazlý içecekler ameliyat öncesinde uygun deðildir.");
                 break;
 
             case "oyuncaklar":
                 score -= 5;
-                ShowWarning(
-                    "Gereksiz oyuncaklarý yanýna almana gerek yok."
-                );
+                ShowWarning("Gereksiz oyuncaklarý yanýna almana gerek yok.");
                 break;
 
             case "yemek":
-                StartCoroutine(
-                    RestartStageRoutine(
-                        "Ameliyat öncesinde yemek yasak olabilir. " +
-                        "Doktorunu dinlemelisin."
-                    )
+                score -= 10;
+
+                ShowWarning(
+                    "Ameliyat öncesinde yemek yasak olabilir. " +
+                    "Doktorunu dinlemelisin."
                 );
-                return;
+                break;
 
             case "su":
-                StartCoroutine(
-                    RestartStageRoutine(
-                        "Ameliyat öncesinde su içmek yasak olabilir. " +
-                        "Doktorunu dinlemelisin."
-                    )
-                );
-                return;
+                score -= 10;
 
-            default:
-                Debug.LogWarning(
-                    $"Tanýmlanmayan eþya: {itemName}"
+                ShowWarning(
+                    "Ameliyat öncesinde su içmek yasak olabilir. " +
+                    "Doktorunu dinlemelisin."
                 );
                 break;
         }
@@ -190,11 +243,7 @@ public class Stage1RoomManager : MonoBehaviour
         score += 10;
         currentRequiredCount++;
 
-        if (
-            clickedImage != null &&
-            flyAnimator != null &&
-            slotTarget != null
-        )
+        if (clickedImage != null && flyAnimator != null && slotTarget != null)
         {
             flyAnimator.FlyToSlot(
                 clickedImage,
@@ -210,11 +259,7 @@ public class Stage1RoomManager : MonoBehaviour
 
     private void AddOptionalToy(Image clickedImage)
     {
-        if (
-            clickedImage != null &&
-            flyAnimator != null &&
-            toySlotTarget != null
-        )
+        if (clickedImage != null && flyAnimator != null && toySlotTarget != null)
         {
             flyAnimator.FlyToSlot(
                 clickedImage,
@@ -228,10 +273,7 @@ public class Stage1RoomManager : MonoBehaviour
         }
     }
 
-    private void ShowSlot(
-        Image slotImage,
-        Sprite sprite
-    )
+    private void ShowSlot(Image slotImage, Sprite sprite)
     {
         if (slotImage == null || sprite == null)
         {
@@ -255,29 +297,20 @@ public class Stage1RoomManager : MonoBehaviour
 
     private void CheckCompletion()
     {
-        if (
-            stageCompleted ||
-            currentRequiredCount < requiredCount
-        )
+        if (stageCompleted || currentRequiredCount < requiredCount)
         {
             return;
         }
 
         stageCompleted = true;
-
-        StartCoroutine(
-            CompleteStageRoutine()
-        );
+        StartCoroutine(CompleteStageRoutine());
     }
 
     private IEnumerator CompleteStageRoutine()
     {
         yield return new WaitForSecondsRealtime(0.7f);
 
-        if (
-            toySelected &&
-            !toyRemovedFromBag
-        )
+        if (toySelected && !toyRemovedFromBag)
         {
             toyRemovedFromBag = true;
 
@@ -316,49 +349,22 @@ public class Stage1RoomManager : MonoBehaviour
         isReturningToMap = true;
 
         StageProgress.CompleteStage(stageNumber);
-
-        StartCoroutine(
-            ReturnToMapRoutine()
-        );
+        StartCoroutine(ReturnToMapRoutine());
     }
 
     private IEnumerator ReturnToMapRoutine()
     {
-        yield return new WaitForSecondsRealtime(
-            mapReturnDelay
-        );
+        yield return new WaitForSecondsRealtime(mapReturnDelay);
 
-        if (
-            string.IsNullOrWhiteSpace(mapSceneName)
-        )
+        if (string.IsNullOrWhiteSpace(mapSceneName))
         {
-            Debug.LogError(
-                "Map Scene Name alaný boþ."
-            );
-
+            Debug.LogError("Map Scene Name alaný boþ.");
             yield break;
         }
 
         SceneManager.LoadScene(mapSceneName);
     }
 
-    private IEnumerator RestartStageRoutine(
-        string warningMessage
-    )
-    {
-        stageCompleted = true;
-
-        if (warningPopup != null)
-        {
-            yield return warningPopup.ShowAndWaitForClose(
-                warningMessage
-            );
-        }
-
-        SceneManager.LoadScene(
-            SceneManager.GetActiveScene().name
-        );
-    }
 
     private void ShowWarning(string message)
     {

@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Asama3StageManager : MonoBehaviour
 {
@@ -29,153 +30,450 @@ public class Asama3StageManager : MonoBehaviour
     [Header("Scoring")]
     public int score = 0;
 
-    [Header("Debug")]
-    [SerializeField] private bool debugSkipEnabled = false;
-    [SerializeField] private DebugPhase debugStartPhase = DebugPhase.Egitim;
+    [Header("Aşama Geçişi")]
+    [SerializeField]
+    private int stageNumber = 3;
 
-    private enum DebugPhase { Egitim, A, B, C }
-    private enum Phase { A, B, C }
+    [SerializeField]
+    private string mapSceneName = "Map";
+
+    [SerializeField]
+    private float mapReturnDelay = 0.4f;
+
+    [Header("Debug")]
+    [SerializeField]
+    private bool debugSkipEnabled = false;
+
+    [SerializeField]
+    private DebugPhase debugStartPhase =
+        DebugPhase.Egitim;
+
+    private enum DebugPhase
+    {
+        Egitim,
+        A,
+        B,
+        C
+    }
+
+    private enum Phase
+    {
+        A,
+        B,
+        C
+    }
+
     private Phase currentPhase = Phase.A;
     private bool stageComplete = false;
+    private bool isReturningToMap = false;
 
     private void Start()
     {
-        if (phaseAContainer != null) phaseAContainer.SetActive(false);
-        if (phaseBContainer != null) phaseBContainer.SetActive(false);
-        if (phaseCContainer != null) phaseCContainer.SetActive(false);
-
-        if (heartDisplay != null) heartDisplay.UpdateHearts(score);
-
-        if (debugSkipEnabled && debugStartPhase != DebugPhase.Egitim)
+        if (phaseAContainer != null)
         {
-            DebugJumpToPhase(debugStartPhase);
+            phaseAContainer.SetActive(false);
+        }
+
+        if (phaseBContainer != null)
+        {
+            phaseBContainer.SetActive(false);
+        }
+
+        if (phaseCContainer != null)
+        {
+            phaseCContainer.SetActive(false);
+        }
+
+        if (heartDisplay != null)
+        {
+            heartDisplay.UpdateHearts(score);
+        }
+
+        if (
+            debugSkipEnabled &&
+            debugStartPhase != DebugPhase.Egitim
+        )
+        {
+            DebugJumpToPhase(
+                debugStartPhase
+            );
+
             return;
         }
 
-        StartCoroutine(IntroThenBeginPhaseA());
+        StartCoroutine(
+            IntroThenBeginPhaseA()
+        );
     }
 
-    private void DebugJumpToPhase(DebugPhase target)
+    private void DebugJumpToPhase(
+        DebugPhase target
+    )
     {
         score = 70;
         stageComplete = false;
+        isReturningToMap = false;
 
-        if (heartDisplay != null) heartDisplay.UpdateHearts(score);
+        if (heartDisplay != null)
+        {
+            heartDisplay.UpdateHearts(score);
+        }
 
         switch (target)
         {
             case DebugPhase.A:
+
                 currentPhase = Phase.A;
-                if (phaseAContainer != null) phaseAContainer.SetActive(true);
+
+                if (phaseAContainer != null)
+                {
+                    phaseAContainer.SetActive(true);
+                }
+
                 if (messageText != null)
-                    messageText.text = "Ameliyat sonrası iyileşmene yardımcı olacak aktiviteleri tamamlayalım!";
+                {
+                    messageText.text =
+                        "Ameliyat sonrası iyileşmene yardımcı olacak aktiviteleri tamamlayalım!";
+                }
+
                 break;
+
             case DebugPhase.B:
+
                 currentPhase = Phase.B;
-                if (phaseBContainer != null) phaseBContainer.SetActive(true);
+
+                if (phaseBContainer != null)
+                {
+                    phaseBContainer.SetActive(true);
+                }
+
                 if (messageText != null)
-                    messageText.text = "Yavaş yavaş hareket etmeye başlayalım, acele etme.";
+                {
+                    messageText.text =
+                        "Yavaş yavaş hareket etmeye başlayalım, acele etme.";
+                }
+
                 break;
+
             case DebugPhase.C:
+
                 currentPhase = Phase.C;
-                if (phaseCContainer != null) phaseCContainer.SetActive(true);
+
+                if (phaseCContainer != null)
+                {
+                    phaseCContainer.SetActive(true);
+                }
+
                 if (messageText != null)
-                    messageText.text = "Sana uygun bir aktivite seç.";
+                {
+                    messageText.text =
+                        "Sana uygun bir aktivite seç.";
+                }
+
                 break;
         }
     }
 
     private IEnumerator IntroThenBeginPhaseA()
     {
-        yield return ShowEducation("introA");
+        stageComplete = true;
 
-        if (phaseAContainer != null) phaseAContainer.SetActive(true);
+        yield return ShowEducation(
+            "introA"
+        );
+
+        stageComplete = false;
+
+        if (phaseAContainer != null)
+        {
+            phaseAContainer.SetActive(true);
+        }
 
         if (messageText != null)
-            messageText.text = "Ameliyat sonrası iyileşmene yardımcı olacak aktiviteleri tamamlayalım!";
+        {
+            messageText.text =
+                "Ameliyat sonrası iyileşmene yardımcı olacak aktiviteleri tamamlayalım!";
+        }
     }
 
-    private IEnumerator ShowEducation(string stepId)
+    private IEnumerator ShowEducation(
+        string stepId
+    )
     {
         if (educationPanel == null)
         {
-            Debug.LogWarning("[A3SM] educationPanel atanmadı, '" + stepId + "' adımı atlanıyor.");
+            Debug.LogWarning(
+                "[A3SM] educationPanel atanmadı, '" +
+                stepId +
+                "' adımı atlanıyor."
+            );
+
             yield break;
         }
 
-        yield return educationPanel.ShowStepAndWaitForClose(stepId);
+        yield return educationPanel
+            .ShowStepAndWaitForClose(
+                stepId
+            );
     }
 
-    public void HandleClick(string itemName, GameObject source)
+    public void HandleClick(
+        string itemName,
+        GameObject source
+    )
     {
-        if (stageComplete) return;
+        if (
+            stageComplete ||
+            isReturningToMap
+        )
+        {
+            return;
+        }
 
         switch (currentPhase)
         {
             case Phase.A:
-                if (postOpActivityManager != null) postOpActivityManager.SelectItem(itemName, source);
-                else Debug.LogError("[A3SM] postOpActivityManager NULL — Inspector'da bağla!");
+
+                if (postOpActivityManager != null)
+                {
+                    postOpActivityManager.SelectItem(
+                        itemName,
+                        source
+                    );
+                }
+                else
+                {
+                    Debug.LogError(
+                        "[A3SM] postOpActivityManager NULL — Inspector'da bağla!"
+                    );
+                }
+
                 break;
+
             case Phase.B:
-                if (roomMovementManager != null) roomMovementManager.SelectItem(itemName, source);
-                else Debug.LogError("[A3SM] roomMovementManager NULL — Inspector'da bağla!");
+
+                if (roomMovementManager != null)
+                {
+                    roomMovementManager.SelectItem(
+                        itemName,
+                        source
+                    );
+                }
+                else
+                {
+                    Debug.LogError(
+                        "[A3SM] roomMovementManager NULL — Inspector'da bağla!"
+                    );
+                }
+
                 break;
+
             case Phase.C:
-                if (activitySelectionManager != null) activitySelectionManager.SelectItem(itemName, source);
-                else Debug.LogError("[A3SM] activitySelectionManager NULL — Inspector'da bağla!");
+
+                if (activitySelectionManager != null)
+                {
+                    activitySelectionManager.SelectItem(
+                        itemName,
+                        source
+                    );
+                }
+                else
+                {
+                    Debug.LogError(
+                        "[A3SM] activitySelectionManager NULL — Inspector'da bağla!"
+                    );
+                }
+
                 break;
         }
     }
 
     public void OnPhaseAComplete()
     {
-        StartCoroutine(TransitionToPhaseB());
+        if (
+            stageComplete ||
+            isReturningToMap
+        )
+        {
+            return;
+        }
+
+        StartCoroutine(
+            TransitionToPhaseB()
+        );
     }
 
     private IEnumerator TransitionToPhaseB()
     {
         stageComplete = true;
-        yield return ShowEducation("toPhaseB");
-        stageComplete = false;
+
+        yield return ShowEducation(
+            "toPhaseB"
+        );
+
         currentPhase = Phase.B;
-        if (phaseAContainer != null) phaseAContainer.SetActive(false);
-        if (phaseBContainer != null) phaseBContainer.SetActive(true);
+
+        if (phaseAContainer != null)
+        {
+            phaseAContainer.SetActive(false);
+        }
+
+        if (phaseBContainer != null)
+        {
+            phaseBContainer.SetActive(true);
+        }
+
         if (messageText != null)
-            messageText.text = "Yavaş yavaş hareket etmeye başlayalım, acele etme.";
+        {
+            messageText.text =
+                "Yavaş yavaş hareket etmeye başlayalım, acele etme.";
+        }
+
+        stageComplete = false;
     }
 
     public void OnPhaseBComplete()
     {
-        StartCoroutine(TransitionToPhaseC());
+        if (
+            stageComplete ||
+            isReturningToMap
+        )
+        {
+            return;
+        }
+
+        StartCoroutine(
+            TransitionToPhaseC()
+        );
     }
 
     private IEnumerator TransitionToPhaseC()
     {
         stageComplete = true;
-        yield return ShowEducation("toPhaseC");
-        stageComplete = false;
+
+        yield return ShowEducation(
+            "toPhaseC"
+        );
+
         currentPhase = Phase.C;
-        if (phaseBContainer != null) phaseBContainer.SetActive(false);
-        if (phaseCContainer != null) phaseCContainer.SetActive(true);
+
+        if (phaseBContainer != null)
+        {
+            phaseBContainer.SetActive(false);
+        }
+
+        if (phaseCContainer != null)
+        {
+            phaseCContainer.SetActive(true);
+        }
+
         if (messageText != null)
-            messageText.text = "Sana uygun bir aktivite seç.";
+        {
+            messageText.text =
+                "Sana uygun bir aktivite seç.";
+        }
+
+        stageComplete = false;
     }
 
     public void OnPhaseCComplete()
     {
-        StartCoroutine(FinishStageRoutine());
+        if (
+            stageComplete ||
+            isReturningToMap
+        )
+        {
+            return;
+        }
+
+        StartCoroutine(
+            FinishStageRoutine()
+        );
     }
 
     private IEnumerator FinishStageRoutine()
     {
         stageComplete = true;
-        yield return ShowEducation("finish");
-        Debug.Log("[A3SM] Asama 3 tamamlandı. Skor: " + score);
+
+        yield return ShowEducation(
+            "finish"
+        );
+
+        Debug.Log(
+            "[A3SM] Aşama 3 tamamlandı. Skor: " +
+            score
+        );
+
+        CompleteStageAndReturnToMap();
     }
 
-    public void AddScore(int amount)
+    private void CompleteStageAndReturnToMap()
+    {
+        if (isReturningToMap)
+        {
+            return;
+        }
+
+        isReturningToMap = true;
+
+        StageProgress.CompleteStage(
+            stageNumber
+        );
+
+        StartCoroutine(
+            ReturnToMapRoutine()
+        );
+    }
+
+    private IEnumerator ReturnToMapRoutine()
+    {
+        yield return new WaitForSecondsRealtime(
+            mapReturnDelay
+        );
+
+        if (
+            string.IsNullOrWhiteSpace(
+                mapSceneName
+            )
+        )
+        {
+            Debug.LogError(
+                "[A3SM] Map Scene Name alanı boş."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        if (
+            !Application.CanStreamedLevelBeLoaded(
+                mapSceneName
+            )
+        )
+        {
+            Debug.LogError(
+                $"[A3SM] '{mapSceneName}' sahnesi Build Profiles " +
+                "içindeki Scene List'te bulunamadı."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        SceneManager.LoadScene(
+            mapSceneName
+        );
+    }
+
+    public void AddScore(
+        int amount
+    )
     {
         score += amount;
-        if (heartDisplay != null) heartDisplay.UpdateHearts(score);
+
+        if (heartDisplay != null)
+        {
+            heartDisplay.UpdateHearts(score);
+        }
     }
 }

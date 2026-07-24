@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Stage2OrderManager : MonoBehaviour
@@ -57,6 +58,16 @@ public class Stage2OrderManager : MonoBehaviour
     [Header("Scoring")]
     public int score = 0;
 
+    [Header("Aşama Geçişi")]
+    [SerializeField]
+    private int stageNumber = 2;
+
+    [SerializeField]
+    private string mapSceneName = "Map";
+
+    [SerializeField]
+    private float mapReturnDelay = 0.4f;
+
     [Header("Debug")]
     [SerializeField] private bool debugSkipEnabled = false;
     [SerializeField] private Phase debugStartPhase = Phase.A;
@@ -64,6 +75,7 @@ public class Stage2OrderManager : MonoBehaviour
     private int currentStep = 0;
     private Phase currentPhase = Phase.A;
     private bool stageComplete = false;
+    private bool isReturningToMap = false;
 
     private enum Phase { A, B, C, D, E, F, G, H }
 
@@ -155,7 +167,10 @@ public class Stage2OrderManager : MonoBehaviour
 
     public void HandleClick(string itemName, GameObject source = null)
     {
-        if (stageComplete) return;
+        if (stageComplete || isReturningToMap)
+        {
+            return;
+        }
 
         switch (currentPhase)
         {
@@ -363,8 +378,84 @@ public class Stage2OrderManager : MonoBehaviour
 
     private IEnumerator FinishStageRoutine()
     {
-        yield return warningPopup.ShowAndWaitForClose("Tebrikler, odana geçeceksin!");
-        Debug.Log("[S2OM] Asama 2 tamamen tamamlandı. Skor: " + score);
+        if (stageComplete || isReturningToMap)
+        {
+            yield break;
+        }
+
+        stageComplete = true;
+
+        if (warningPopup != null)
+        {
+            yield return warningPopup.ShowAndWaitForClose(
+                "Tebrikler, odana geçeceksin!"
+            );
+        }
+
+        Debug.Log(
+            "[S2OM] Aşama 2 tamamen tamamlandı. Skor: " +
+            score
+        );
+
+        CompleteStageAndReturnToMap();
+    }
+
+    private void CompleteStageAndReturnToMap()
+    {
+        if (isReturningToMap)
+        {
+            return;
+        }
+
+        isReturningToMap = true;
+
+        StageProgress.CompleteStage(
+            stageNumber
+        );
+
+        StartCoroutine(
+            ReturnToMapRoutine()
+        );
+    }
+
+    private IEnumerator ReturnToMapRoutine()
+    {
+        yield return new WaitForSecondsRealtime(
+            mapReturnDelay
+        );
+
+        if (
+            string.IsNullOrWhiteSpace(
+                mapSceneName
+            )
+        )
+        {
+            Debug.LogError(
+                "[S2OM] Map Scene Name alanı boş."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        if (
+            !Application.CanStreamedLevelBeLoaded(
+                mapSceneName
+            )
+        )
+        {
+            Debug.LogError(
+                $"[S2OM] '{mapSceneName}' sahnesi Build Profiles " +
+                "içindeki Scene List'te bulunamadı."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        SceneManager.LoadScene(
+            mapSceneName
+        );
     }
 
     public void AddScore(int amount)

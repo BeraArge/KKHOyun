@@ -8381,7 +8381,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "Normal kan bas\u0131nc\u0131 de\u011Feri nedir?"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dc39eb91f1c299149b745c910e43583b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 0161d805a3764c089bef00bfe00793f5, type: 2}
   m_sharedMaterial: {fileID: 3864038315601394219, guid: dc39eb91f1c299149b745c910e43583b, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -8448,7 +8448,7 @@ MonoBehaviour:
   m_margin: {x: -531.9608, y: -163.9707, z: -415.21234, w: -315.37247}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1549197382
