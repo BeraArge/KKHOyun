@@ -10,10 +10,18 @@ public class Stage2OrderManager : MonoBehaviour
     public WarningPopupUI warningPopup;
     public DialoguePromptUI dialoguePrompt;
 
+    [Header("Eğitim Paneli (adımlar panelin kendi Inspector listesinde tanımlanır)")]
+    public EducationPanelUI educationPanel;
+
     [Header("Phase Containers")]
     public GameObject phaseAContainer;
     public GameObject phaseBContainer;
     public GameObject phaseCContainer;
+    public GameObject phaseDContainer;
+    public GameObject phaseEContainer;
+    public GameObject phaseFContainer;
+    public GameObject phaseGContainer;
+    public GameObject phaseHContainer;
 
     [Header("Phase A - Oda Sırası")]
     public string[] correctRoomOrder = { "kayit", "doktor", "bekleme", "ameliyat" };
@@ -23,26 +31,121 @@ public class Stage2OrderManager : MonoBehaviour
     [Header("Phase C")]
     public PreparationRoomManager prepRoomManager;
 
+    [Header("Phase D - Sedye")]
+    public StretcherPhaseManager stretcherPhaseManager;
+
+    [Header("Phase E - İyileşme Odası")]
+    public RecoveryRoomManager recoveryRoomManager;
+
+    [Header("Phase F - Yürüyüş")]
+    public WalkingPhaseManager walkingPhaseManager;
+
+    [Header("Phase G - Eğitim Videosu")]
+    public EducationVideoManager videoManager;
+
+    [Header("Phase H - Beslenme")]
+    public FeedingRoomManager feedingRoomManager;
+
+    [Header("Kalp Göstergesi")]
+    public HeartDisplayUI heartDisplay;
+
     [Header("Scoring")]
     public int score = 0;
+
+    [Header("Debug")]
+    [SerializeField] private bool debugSkipEnabled = false;
+    [SerializeField] private Phase debugStartPhase = Phase.A;
 
     private int currentStep = 0;
     private Phase currentPhase = Phase.A;
     private bool stageComplete = false;
 
-    private enum Phase { A, B, C }
+    private enum Phase { A, B, C, D, E, F, G, H }
 
     private void Start()
     {
-        if (phaseAContainer != null) phaseAContainer.SetActive(true);
+        if (debugSkipEnabled)
+        {
+            DebugJumpToPhase(debugStartPhase);
+            return;
+        }
+
+        if (phaseAContainer != null) phaseAContainer.SetActive(false);
         if (phaseBContainer != null) phaseBContainer.SetActive(false);
         if (phaseCContainer != null) phaseCContainer.SetActive(false);
-
-        if (messageText != null)
-            messageText.text = "Hastanede doğru sırayı takip etmelisin!";
+        if (phaseDContainer != null) phaseDContainer.SetActive(false);
+        if (phaseEContainer != null) phaseEContainer.SetActive(false);
+        if (phaseFContainer != null) phaseFContainer.SetActive(false);
+        if (phaseGContainer != null) phaseGContainer.SetActive(false);
+        if (phaseHContainer != null) phaseHContainer.SetActive(false);
 
         foreach (var img in roomSlotImages)
             if (img != null) img.enabled = false;
+
+        if (heartDisplay != null) heartDisplay.UpdateHearts(score);
+
+        StartCoroutine(IntroThenBeginPhaseA());
+    }
+
+    private IEnumerator IntroThenBeginPhaseA()
+    {
+        stageComplete = true;
+        yield return ShowEducation("intro");
+        stageComplete = false;
+
+        if (phaseAContainer != null) phaseAContainer.SetActive(true);
+
+        if (messageText != null)
+            messageText.text = "Hastanede doğru sırayı takip etmelisin!";
+    }
+
+    private IEnumerator ShowEducation(string stepId)
+    {
+        if (educationPanel == null)
+        {
+            Debug.LogWarning("[S2OM] educationPanel atanmadı, '" + stepId + "' adımı atlanıyor.");
+            yield break;
+        }
+
+        yield return educationPanel.ShowStepAndWaitForClose(stepId);
+    }
+
+    private void DebugJumpToPhase(Phase target)
+    {
+        score = 70;
+        stageComplete = false;
+        currentPhase = target;
+
+        if (phaseAContainer != null) phaseAContainer.SetActive(target == Phase.A);
+        if (phaseBContainer != null) phaseBContainer.SetActive(target == Phase.B);
+        if (phaseCContainer != null) phaseCContainer.SetActive(target == Phase.C);
+        if (phaseDContainer != null) phaseDContainer.SetActive(target == Phase.D);
+        if (phaseEContainer != null) phaseEContainer.SetActive(target == Phase.E);
+        if (phaseFContainer != null) phaseFContainer.SetActive(target == Phase.F);
+        if (phaseGContainer != null) phaseGContainer.SetActive(target == Phase.G);
+        if (phaseHContainer != null) phaseHContainer.SetActive(target == Phase.H);
+
+        if (heartDisplay != null) heartDisplay.UpdateHearts(score);
+
+        switch (target)
+        {
+            case Phase.D:
+                if (stretcherPhaseManager != null) stretcherPhaseManager.StartPhase();
+                else Debug.LogError("[S2OM] stretcherPhaseManager NULL — Inspector'da bağla!");
+                break;
+            case Phase.E:
+                if (recoveryRoomManager != null) recoveryRoomManager.StartPhase();
+                else Debug.LogError("[S2OM] recoveryRoomManager NULL — Inspector'da bağla!");
+                break;
+            case Phase.F:
+                if (walkingPhaseManager != null) walkingPhaseManager.StartPhase();
+                else Debug.LogError("[S2OM] walkingPhaseManager NULL — Inspector'da bağla!");
+                break;
+            case Phase.G:
+                if (videoManager != null) videoManager.StartPhase();
+                else Debug.LogError("[S2OM] videoManager NULL — Inspector'da bağla!");
+                break;
+        }
     }
 
     public void HandleClick(string itemName, GameObject source = null)
@@ -57,6 +160,14 @@ public class Stage2OrderManager : MonoBehaviour
                 if (prepRoomManager != null) prepRoomManager.SelectItem(itemName, source);
                 else Debug.LogError("[S2OM] prepRoomManager NULL — Inspector'da bağla!");
                 break;
+            case Phase.E:
+                if (recoveryRoomManager != null) recoveryRoomManager.SelectItem(itemName, source);
+                else Debug.LogError("[S2OM] recoveryRoomManager NULL — Inspector'da bağla!");
+                break;
+            case Phase.H:
+                if (feedingRoomManager != null) feedingRoomManager.SelectItem(itemName, source);
+                else Debug.LogError("[S2OM] feedingRoomManager NULL — Inspector'da bağla!");
+                break;
         }
     }
 
@@ -68,7 +179,7 @@ public class Stage2OrderManager : MonoBehaviour
 
         if (itemName == correctRoomOrder[currentStep])
         {
-            score += 10;
+            AddScore(10);
             int step = currentStep++;
             RevealRoomSlot(step);
             if (currentStep >= correctRoomOrder.Length)
@@ -76,7 +187,7 @@ public class Stage2OrderManager : MonoBehaviour
         }
         else
         {
-            score -= 5;
+            AddScore(-5);
             warningPopup.Show("Bu sıra doğru değil! Daha dikkatli düşün.");
         }
     }
@@ -118,7 +229,7 @@ public class Stage2OrderManager : MonoBehaviour
         }
         else
         {
-            score -= 5;
+            AddScore(-5);
             string message = characterType == "yabanci"
                 ? "Bu kişiyi tanımıyorsun, güvenli değil!"
                 : "Temizlik görevlisi sana yardım edemez.";
@@ -136,7 +247,10 @@ public class Stage2OrderManager : MonoBehaviour
 
     private IEnumerator TransitionToPhaseC()
     {
+        stageComplete = true;
         yield return new WaitForSeconds(0.3f);
+        yield return ShowEducation("afterB");
+        stageComplete = false;
         currentPhase = Phase.C;
         if (phaseBContainer != null) phaseBContainer.SetActive(false);
         if (phaseCContainer != null) phaseCContainer.SetActive(true);
@@ -148,18 +262,101 @@ public class Stage2OrderManager : MonoBehaviour
 
     public void OnPhaseCComplete()
     {
-        StartCoroutine(CompleteStageRoutine());
+        StartCoroutine(TransitionToPhaseD());
     }
 
-    private IEnumerator CompleteStageRoutine()
+    private IEnumerator TransitionToPhaseD()
     {
         stageComplete = true;
         yield return warningPopup.ShowAndWaitForClose("Harika! Şimdi hazırlanıyorsun!");
-        Debug.Log("Asama 2 tamamlandı. Toplam skor: " + score);
+        stageComplete = false;
+        currentPhase = Phase.D;
+        if (phaseCContainer != null) phaseCContainer.SetActive(false);
+        if (phaseDContainer != null) phaseDContainer.SetActive(true);
+        if (stretcherPhaseManager != null) stretcherPhaseManager.StartPhase();
+        else Debug.LogError("[S2OM] stretcherPhaseManager NULL — Inspector'da bağla!");
+    }
+
+    // ─── BÖLÜM D callback ────────────────────────────────────────────────────
+
+    public void OnPhaseDComplete()
+    {
+        StartCoroutine(TransitionToPhaseE());
+    }
+
+    private IEnumerator TransitionToPhaseE()
+    {
+        stageComplete = true;
+        if (phaseDContainer != null) phaseDContainer.SetActive(false);
+        yield return ShowEducation("afterD");
+        stageComplete = false;
+        currentPhase = Phase.E;
+        if (phaseEContainer != null) phaseEContainer.SetActive(true);
+        if (messageText != null)
+            messageText.text = "İyileşme odasındasın! Doğru davranışları seç.";
+        if (recoveryRoomManager != null) recoveryRoomManager.StartPhase();
+        else Debug.LogError("[S2OM] recoveryRoomManager NULL — Inspector'da bağla!");
+    }
+
+    // ─── BÖLÜM E callback ────────────────────────────────────────────────────
+
+    public void OnPhaseEComplete()
+    {
+        StartCoroutine(TransitionToPhaseF());
+    }
+
+    private IEnumerator TransitionToPhaseF()
+    {
+        stageComplete = true;
+        if (phaseEContainer != null) phaseEContainer.SetActive(false);
+        yield return ShowEducation("afterE");
+        stageComplete = false;
+        currentPhase = Phase.F;
+        if (phaseFContainer != null) phaseFContainer.SetActive(true);
+        if (messageText != null)
+            messageText.text = "Şimdi biraz yürüyelim!";
+        if (walkingPhaseManager != null) walkingPhaseManager.StartPhase();
+        else Debug.LogError("[S2OM] walkingPhaseManager NULL — Inspector'da bağla!");
+    }
+
+    // ─── BÖLÜM F callback ────────────────────────────────────────────────────
+
+    public void OnPhaseFComplete()
+    {
+        currentPhase = Phase.G;
+        if (phaseFContainer != null) phaseFContainer.SetActive(false);
+        if (phaseGContainer != null) phaseGContainer.SetActive(true);
+        if (videoManager != null) videoManager.StartPhase();
+        else Debug.LogError("[S2OM] videoManager NULL — Inspector'da bağla!");
+    }
+
+    // ─── BÖLÜM G callback ────────────────────────────────────────────────────
+
+    public void OnPhaseGComplete()
+    {
+        currentPhase = Phase.H;
+        if (phaseGContainer != null) phaseGContainer.SetActive(false);
+        if (phaseHContainer != null) phaseHContainer.SetActive(true);
+        if (messageText != null)
+            messageText.text = "Şimdi ağızdan beslenmeye başlayabilirsin!";
+    }
+
+    // ─── BÖLÜM H callback ────────────────────────────────────────────────────
+
+    public void OnPhaseHComplete()
+    {
+        StartCoroutine(FinishStageRoutine());
+    }
+
+    private IEnumerator FinishStageRoutine()
+    {
+        yield return warningPopup.ShowAndWaitForClose("Tebrikler, odana geçeceksin!");
+        Debug.Log("[S2OM] Asama 2 tamamen tamamlandı. Skor: " + score);
     }
 
     public void AddScore(int amount)
     {
         score += amount;
+        if (heartDisplay != null) heartDisplay.UpdateHearts(score);
     }
 }

@@ -38,7 +38,7 @@ public class PreparationRoomManager : MonoBehaviour
                 }
                 break;
 
-            case "yat":
+            case "yatak":
                 if (!layDownDone)
                 {
                     layDownDone = true;
