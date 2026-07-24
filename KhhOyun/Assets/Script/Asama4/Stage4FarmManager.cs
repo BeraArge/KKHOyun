@@ -5,11 +5,26 @@ using UnityEngine.UI;
 
 public class Stage4FarmManager : MonoBehaviour
 {
+    [Header("Eðitim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    public EducationPanelUI educationPanel;
+
+    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [SerializeField]
+    private string educationStepId = "asama4_egitim1";
+
     [Header("Popup")]
     public WarningPopupUI warningPopup;
 
     [Header("Fly Animation")]
     public ItemFlyAnimator flyAnimator;
+
+    [Header("Bölüm Geçiþi")]
+    [Tooltip("Saðlýklý besinlerin toplandýðý Farm bölümünün ana objesi.")]
+    public GameObject farmContainer;
+
+    [Tooltip("Farm bölümü tamamlandýktan sonra açýlacak Dengeli Tabak bölümü.")]
+    public GameObject plateContainer;
 
     [Header("Collected Food Slots")]
     public Image[] collectedSlots;
@@ -20,22 +35,101 @@ public class Stage4FarmManager : MonoBehaviour
     public int requiredHealthyFoodCount = 7;
     public int collectedHealthyFoodCount = 0;
 
-    private bool stageCompleted = false;
-    private HashSet<string> collectedFoods = new HashSet<string>();
+    private bool stageCompleted;
+    private bool transitionInProgress;
+    private bool educationIsOpen;
+
+    private readonly HashSet<string> collectedFoods =
+        new HashSet<string>();
 
     private void Start()
     {
-        foreach (Image slot in collectedSlots)
+        stageCompleted = false;
+        transitionInProgress = false;
+        educationIsOpen = true;
+
+        // Eðitim bitene kadar iki oyun bölümü de kapalý kalýr.
+        if (farmContainer != null)
         {
-            if (slot != null)
-                slot.enabled = false;
+            farmContainer.SetActive(false);
         }
+
+        if (plateContainer != null)
+        {
+            plateContainer.SetActive(false);
+        }
+
+        if (collectedSlots != null)
+        {
+            foreach (Image slot in collectedSlots)
+            {
+                if (slot != null)
+                {
+                    slot.enabled = false;
+                }
+            }
+        }
+
+        StartCoroutine(
+            StartEducationThenFarm()
+        );
     }
 
-    public void SelectFood(string foodName, Image clickedImage = null)
+    private IEnumerator StartEducationThenFarm()
     {
-        if (stageCompleted)
+        if (educationPanel != null)
+        {
+            yield return educationPanel
+                .ShowStepAndWaitForClose(
+                    educationStepId
+                );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Stage4FarmManager: Education Panel atanmadý. " +
+                "Eðitim adýmý atlanýyor."
+            );
+        }
+
+        educationIsOpen = false;
+
+        // Eðitim kapandýktan sonra Farm bölümü açýlýr.
+        if (farmContainer != null)
+        {
+            farmContainer.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError(
+                "Stage4FarmManager: Farm Container atanmadý."
+            );
+        }
+
+        // Dengeli Tabak, Farm tamamlanana kadar kapalý kalýr.
+        if (plateContainer != null)
+        {
+            plateContainer.SetActive(false);
+        }
+
+        Debug.Log(
+            "[Stage4FarmManager] Eðitim tamamlandý. Farm bölümü baþladý."
+        );
+    }
+
+    public void SelectFood(
+        string foodName,
+        Image clickedImage = null
+    )
+    {
+        if (
+            educationIsOpen ||
+            stageCompleted ||
+            transitionInProgress
+        )
+        {
             return;
+        }
 
         switch (foodName)
         {
@@ -47,46 +141,86 @@ public class Stage4FarmManager : MonoBehaviour
             case "erik":
             case "kiraz":
             case "zeytinyagi":
-                SelectHealthyFood(foodName, clickedImage);
+
+                SelectHealthyFood(
+                    foodName,
+                    clickedImage
+                );
+
                 break;
 
             case "hamburger":
+
                 score -= 10;
-                warningPopup.Show("Hamburgeri sýk tüketmemeliyiz.\nKalbine daha faydalý besinleri seçelim.");
+
+                ShowWarning(
+                    "Hamburgeri sýk tüketmemeliyiz.\n" +
+                    "Kalbine daha faydalý besinleri seçelim."
+                );
+
                 break;
 
             case "cips":
+
                 score -= 10;
-                warningPopup.Show("Cips yerine daha saðlýklý atýþtýrmalýklar seçebilirsin.");
+
+                ShowWarning(
+                    "Cips yerine daha saðlýklý atýþtýrmalýklar seçebilirsin."
+                );
+
                 break;
 
             case "kola":
             case "soda":
+
                 score -= 10;
-                warningPopup.Show("Gazlý içecekler saðlýklý bir seçim deðildir.");
+
+                ShowWarning(
+                    "Gazlý içecekler saðlýklý bir seçim deðildir."
+                );
+
                 break;
 
             case "tuz":
+
                 score -= 15;
-                warningPopup.Show("Aþýrý tuz kalbini yorabilir.");
+
+                ShowWarning(
+                    "Aþýrý tuz kalbini yorabilir."
+                );
+
                 break;
 
             default:
-                Debug.LogWarning("Tanýmsýz besin adý: " + foodName);
+
+                Debug.LogWarning(
+                    "Tanýmsýz besin adý: " +
+                    foodName
+                );
+
                 break;
         }
 
         CheckCompletion();
     }
 
-    private void SelectHealthyFood(string foodName, Image clickedImage)
+    private void SelectHealthyFood(
+        string foodName,
+        Image clickedImage
+    )
     {
         if (collectedFoods.Contains(foodName))
+        {
             return;
+        }
 
         if (clickedImage == null)
         {
-            Debug.LogError(foodName + " için Fly Image atanmadý.");
+            Debug.LogError(
+                foodName +
+                " için Fly Image atanmadý."
+            );
+
             return;
         }
 
@@ -94,32 +228,69 @@ public class Stage4FarmManager : MonoBehaviour
 
         score += 10;
 
-        int slotIndex = collectedHealthyFoodCount;
+        int slotIndex =
+            collectedHealthyFoodCount;
+
         collectedHealthyFoodCount++;
 
-        if (slotIndex >= collectedSlots.Length)
-            return;
-
-        Image targetSlot = collectedSlots[slotIndex];
-        RectTransform targetRect = collectedSlotTargets[slotIndex];
-
-        if (flyAnimator != null)
+        if (
+            collectedSlots == null ||
+            collectedSlotTargets == null ||
+            slotIndex >= collectedSlots.Length ||
+            slotIndex >= collectedSlotTargets.Length
+        )
         {
-            flyAnimator.FlyToSlot(clickedImage, targetRect, () =>
-            {
-                ShowSlot(targetSlot, clickedImage.sprite);
-            });
+            Debug.LogWarning(
+                "Toplanan besin için yeterli slot veya hedef bulunamadý."
+            );
+
+            return;
+        }
+
+        Image targetSlot =
+            collectedSlots[slotIndex];
+
+        RectTransform targetRect =
+            collectedSlotTargets[slotIndex];
+
+        if (
+            flyAnimator != null &&
+            targetRect != null
+        )
+        {
+            flyAnimator.FlyToSlot(
+                clickedImage,
+                targetRect,
+                () =>
+                {
+                    ShowSlot(
+                        targetSlot,
+                        clickedImage.sprite
+                    );
+                }
+            );
         }
         else
         {
-            ShowSlot(targetSlot, clickedImage.sprite);
+            ShowSlot(
+                targetSlot,
+                clickedImage.sprite
+            );
         }
     }
 
-    private void ShowSlot(Image slotImage, Sprite sprite)
+    private void ShowSlot(
+        Image slotImage,
+        Sprite sprite
+    )
     {
-        if (slotImage == null || sprite == null)
+        if (
+            slotImage == null ||
+            sprite == null
+        )
+        {
             return;
+        }
 
         slotImage.sprite = sprite;
         slotImage.color = Color.white;
@@ -129,21 +300,81 @@ public class Stage4FarmManager : MonoBehaviour
 
     private void CheckCompletion()
     {
-        if (!stageCompleted && collectedHealthyFoodCount >= requiredHealthyFoodCount)
+        if (
+            transitionInProgress ||
+            stageCompleted ||
+            collectedHealthyFoodCount <
+            requiredHealthyFoodCount
+        )
         {
-            stageCompleted = true;
-            StartCoroutine(CompleteStageRoutine());
+            return;
         }
+
+        transitionInProgress = true;
+
+        StartCoroutine(
+            CompleteFarmRoutine()
+        );
     }
 
-    private IEnumerator CompleteStageRoutine()
+    private IEnumerator CompleteFarmRoutine()
     {
-        yield return new WaitForSeconds(0.7f);
-
-        yield return warningPopup.ShowAndWaitForClose(
-            "Harikasýn!\nSaðlýklý besinleri topladýn.\nÞimdi dengeli tabak hazýrlayabiliriz!"
+        yield return new WaitForSecondsRealtime(
+            0.7f
         );
 
-        Debug.Log("Dengeli Tabak bölümüne geçilecek.");
+        if (warningPopup != null)
+        {
+            yield return warningPopup
+                .ShowAndWaitForClose(
+                    "Harikasýn!\n" +
+                    "Saðlýklý besinleri topladýn.\n" +
+                    "Þimdi dengeli tabak hazýrlayabiliriz!"
+                );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Harikasýn! Saðlýklý besinleri topladýn. " +
+                "Þimdi dengeli tabak hazýrlayabiliriz!"
+            );
+        }
+
+        stageCompleted = true;
+
+        if (plateContainer != null)
+        {
+            plateContainer.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError(
+                "Stage4FarmManager: Plate Container atanmadý."
+            );
+        }
+
+        if (farmContainer != null)
+        {
+            farmContainer.SetActive(false);
+        }
+
+        Debug.Log(
+            "[Stage4FarmManager] Farm bölümü tamamlandý. " +
+            "Dengeli Tabak bölümüne geçildi."
+        );
+    }
+
+    private void ShowWarning(
+        string message
+    )
+    {
+        if (warningPopup != null)
+        {
+            warningPopup.Show(message);
+        }
+        else
+        {
+            Debug.LogWarning(message);
+        }
     }
 }

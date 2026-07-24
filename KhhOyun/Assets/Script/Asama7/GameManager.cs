@@ -6,6 +6,19 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    [Header("Eðitim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    public EducationPanelUI educationPanel;
+
+    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [SerializeField]
+    private string educationStepId = "asama7_egitim1";
+
+    [Header("Eðitim Týklama Engelleyici")]
+    [Tooltip("Eðitim sýrasýnda Task1 içindeki meyvelerin önünde duracak görünmez blocker objesi.")]
+    [SerializeField]
+    private GameObject educationInputBlocker;
+
     [Header("Görev Ayarlarý")]
     [SerializeField]
     private int totalTasks = 5;
@@ -20,10 +33,12 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float mapReturnDelay = 0.4f;
 
-    private int completedTasks = 0;
+    private int completedTasks;
 
-    private bool gameCompleted = false;
-    private bool isReturningToMap = false;
+    private bool educationIsOpen;
+    private bool gameStarted;
+    private bool gameCompleted;
+    private bool isReturningToMap;
 
     // Ayný görevin birden fazla kez sayýlmasýný engeller.
     private readonly HashSet<int> completedTaskIds =
@@ -41,11 +56,60 @@ public class GameManager : MonoBehaviour
             HandleTaskCompletion;
     }
 
+    private void Start()
+    {
+        completedTasks = 0;
+        educationIsOpen = true;
+        gameStarted = false;
+        gameCompleted = false;
+        isReturningToMap = false;
+
+        completedTaskIds.Clear();
+
+        // Eðitim açýkken blocker aktif olur.
+        SetEducationBlockerActive(true);
+
+        StartCoroutine(
+            StartEducationRoutine()
+        );
+    }
+
+    private IEnumerator StartEducationRoutine()
+    {
+        if (educationPanel != null)
+        {
+            yield return educationPanel
+                .ShowStepAndWaitForClose(
+                    educationStepId
+                );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[GameManager] Education Panel atanmadý. " +
+                "Aþama 7 eðitimi atlanýyor."
+            );
+        }
+
+        educationIsOpen = false;
+        gameStarted = true;
+
+        // Eðitim kapandýktan sonra blocker kapanýr.
+        SetEducationBlockerActive(false);
+
+        Debug.Log(
+            "[GameManager] Aþama 7 eðitimi tamamlandý. Oyun baþladý."
+        );
+    }
+
     private void HandleTaskCompletion(
         int taskId
     )
     {
+        // Eðitim kapanmadan hiçbir görev tamamlanmýþ sayýlmaz.
         if (
+            educationIsOpen ||
+            !gameStarted ||
             gameCompleted ||
             isReturningToMap
         )
@@ -79,6 +143,7 @@ public class GameManager : MonoBehaviour
     private void CompleteStage()
     {
         if (
+            !gameStarted ||
             gameCompleted ||
             isReturningToMap
         )
@@ -150,10 +215,28 @@ public class GameManager : MonoBehaviour
         );
     }
 
+    private void SetEducationBlockerActive(
+        bool active
+    )
+    {
+        if (educationInputBlocker != null)
+        {
+            educationInputBlocker.SetActive(active);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[GameManager] Education Input Blocker atanmadý."
+            );
+        }
+    }
+
     private void Update()
     {
         if (
             Keyboard.current == null ||
+            educationIsOpen ||
+            !gameStarted ||
             gameCompleted ||
             isReturningToMap
         )

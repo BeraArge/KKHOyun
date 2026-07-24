@@ -44,6 +44,18 @@ public class Stage6Manager : MonoBehaviour
     private float betweenStepsDelay = 2f;
 
     // --------------------------------------------------
+    // EÐÝTÝM PANELÝ
+    // --------------------------------------------------
+
+    [Header("Eðitim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    public EducationPanelUI educationPanel;
+
+    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [SerializeField]
+    private string educationStepId = "asama6_egitim1";
+
+    // --------------------------------------------------
     // BAÞLANGIÇ BÝLGÝLENDÝRME PANELÝ
     // --------------------------------------------------
 
@@ -285,6 +297,39 @@ public class Stage6Manager : MonoBehaviour
         PrepareScene();
 
         mainSequence = StartCoroutine(
+            StartEducationThenIntro()
+        );
+    }
+
+    private IEnumerator StartEducationThenIntro()
+    {
+        inputLocked = true;
+
+        HideAllGameplayObjects();
+
+        // Eðitim sýrasýnda yalnýzca normal bisikletli çocuk görünür.
+        SetActiveSafe(
+            normalChild,
+            true
+        );
+
+        if (educationPanel != null)
+        {
+            yield return educationPanel
+                .ShowStepAndWaitForClose(
+                    educationStepId
+                );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Stage6Manager: Education Panel atanmadý. " +
+                "Aþama 6 eðitimi atlanýyor."
+            );
+        }
+
+        // Eðitim kapanýnca mevcut Aþama 6 baþlangýç akýþýna devam edilir.
+        yield return StartCoroutine(
             StartStage6Intro()
         );
     }

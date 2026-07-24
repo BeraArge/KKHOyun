@@ -24,6 +24,15 @@ public class Stage4PlateManager : MonoBehaviour
     private bool stageCompleted;
     private bool isReturningToMap;
 
+    private void OnEnable()
+    {
+        // Plate bölümü Farm tamamlandýktan sonra açýldýðýnda
+        // sayaç temiz ve kullanýlabilir durumda baþlar.
+        currentPlacements = 0;
+        stageCompleted = false;
+        isReturningToMap = false;
+    }
+
     public void CorrectPlacement()
     {
         if (
@@ -155,15 +164,11 @@ public class Stage4PlateManager : MonoBehaviour
     {
         if (warningPopup != null)
         {
-            warningPopup.Show(
-                message
-            );
+            warningPopup.Show(message);
         }
         else
         {
-            Debug.LogWarning(
-                message
-            );
+            Debug.LogWarning(message);
         }
     }
 }

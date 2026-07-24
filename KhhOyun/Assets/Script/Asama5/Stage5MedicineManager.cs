@@ -5,6 +5,18 @@ using UnityEngine.UI;
 
 public class Stage5MedicineManager : MonoBehaviour
 {
+    [Header("Eðitim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    public EducationPanelUI educationPanel;
+
+    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [SerializeField]
+    private string educationStepId = "asama5_egitim1";
+
+    [Header("Sahne Ýçeriði")]
+    [Tooltip("Eðitim tamamlanana kadar kapalý kalacak ilaç seçimi sahnesi.")]
+    public GameObject sceneContent;
+
     [Header("Popup")]
     public WarningPopupUI warningPopup;
 
@@ -41,17 +53,63 @@ public class Stage5MedicineManager : MonoBehaviour
     [SerializeField]
     private float mapReturnDelay = 0.4f;
 
-    private bool vitaminSelected = false;
-    private bool heartMedicineSelected = false;
-    private bool syrupSelected = false;
-    private bool stageCompleted = false;
-    private bool isReturningToMap = false;
+    private bool vitaminSelected;
+    private bool heartMedicineSelected;
+    private bool syrupSelected;
+    private bool stageCompleted;
+    private bool isReturningToMap;
+    private bool educationIsOpen;
 
     private void Start()
     {
         HideSlot(vitaminSlotImage);
         HideSlot(heartMedicineSlotImage);
         HideSlot(syrupSlotImage);
+
+        educationIsOpen = true;
+
+        if (sceneContent != null)
+        {
+            sceneContent.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Stage5MedicineManager: Scene Content alanýna ilaç seçimi sahnesi atanmadý."
+            );
+        }
+
+        StartCoroutine(
+            StartEducationRoutine()
+        );
+    }
+
+    private IEnumerator StartEducationRoutine()
+    {
+        if (educationPanel != null)
+        {
+            yield return educationPanel
+                .ShowStepAndWaitForClose(
+                    educationStepId
+                );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "Stage5MedicineManager: Education Panel atanmadý. Eðitim adýmý atlanýyor."
+            );
+        }
+
+        educationIsOpen = false;
+
+        if (sceneContent != null)
+        {
+            sceneContent.SetActive(true);
+        }
+
+        Debug.Log(
+            "[Stage5MedicineManager] Eðitim tamamlandý. Ýlaç seçimi baþladý."
+        );
     }
 
     public void SelectMedicine(
@@ -60,6 +118,7 @@ public class Stage5MedicineManager : MonoBehaviour
     )
     {
         if (
+            educationIsOpen ||
             stageCompleted ||
             isReturningToMap
         )
