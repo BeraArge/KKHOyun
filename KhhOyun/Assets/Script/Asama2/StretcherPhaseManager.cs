@@ -84,8 +84,9 @@ public class StretcherPhaseManager : MonoBehaviour
     {
         if (breathingPanel != null) breathingPanel.SetActive(true);
 
-        Vector3 small = Vector3.one * circleMinScale;
-        Vector3 large = Vector3.one * circleMaxScale;
+        Vector3 baseScale = breathingCircle != null ? breathingCircle.localScale : Vector3.one;
+        Vector3 small = baseScale * circleMinScale;
+        Vector3 large = baseScale * circleMaxScale;
 
         if (breathingCircle != null) breathingCircle.localScale = small;
 

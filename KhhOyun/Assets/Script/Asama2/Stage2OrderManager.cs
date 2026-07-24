@@ -13,6 +13,11 @@ public class Stage2OrderManager : MonoBehaviour
     [Header("Eğitim Paneli (adımlar panelin kendi Inspector listesinde tanımlanır)")]
     public EducationPanelUI educationPanel;
 
+    [Header("Phase B - Karakter Seçimi")]
+    public Image characterDisplay;
+    public Sprite doktorSprite;
+    public Sprite hemsireSprite;
+
     [Header("Phase Containers")]
     public GameObject phaseAContainer;
     public GameObject phaseBContainer;
@@ -221,6 +226,13 @@ public class Stage2OrderManager : MonoBehaviour
         Debug.Log("Phase B tıklandı: " + characterType + " | dialoguePrompt: " + (dialoguePrompt == null ? "NULL" : "OK"));
         if (characterType == "doktor" || characterType == "hemsire")
         {
+            if (phaseBContainer != null) phaseBContainer.SetActive(false);
+            if (characterDisplay != null)
+            {
+                characterDisplay.sprite = characterType == "doktor" ? doktorSprite : hemsireSprite;
+                characterDisplay.gameObject.SetActive(true);
+            }
+
             dialoguePrompt.ShowTwoButton(
                 "Merhaba! Seni ameliyata hazırlayacağız.",
                 "Tamam", () => StartCoroutine(TransitionToPhaseC()),
@@ -248,6 +260,7 @@ public class Stage2OrderManager : MonoBehaviour
     private IEnumerator TransitionToPhaseC()
     {
         stageComplete = true;
+        if (characterDisplay != null) characterDisplay.gameObject.SetActive(false);
         yield return new WaitForSeconds(0.3f);
         yield return ShowEducation("afterB");
         stageComplete = false;
