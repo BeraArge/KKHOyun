@@ -1080,8 +1080,11 @@ MonoBehaviour:
   roomMovementManager: {fileID: 1456908222}
   activitySelectionManager: {fileID: 66763021}
   score: 0
+  stageNumber: 3
+  mapSceneName: Map
+  mapReturnDelay: 0.4
   debugSkipEnabled: 1
-  debugStartPhase: 3
+  debugStartPhase: 0
 --- !u!1 &754509579
 GameObject:
   m_ObjectHideFlags: 0
@@ -6092,7 +6095,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7682010875494871822, guid: 861261748c481be44a4502bd2dffbf9e, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

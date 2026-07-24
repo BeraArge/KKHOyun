@@ -3260,8 +3260,11 @@ MonoBehaviour:
   feedingRoomManager: {fileID: 318571383}
   heartDisplay: {fileID: 0}
   score: 0
+  stageNumber: 2
+  mapSceneName: Map
+  mapReturnDelay: 0.4
   debugSkipEnabled: 1
-  debugStartPhase: 5
+  debugStartPhase: 0
 --- !u!1 &718081933
 GameObject:
   m_ObjectHideFlags: 0
