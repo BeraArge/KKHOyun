@@ -8,11 +8,11 @@ public class StageMapManager : MonoBehaviour
     [Header("Loading Sahnesi")]
     [SerializeField] private string loadingSceneName = "LoadingScene";
 
-    [Header("Panel Yazýlarý")]
+    [Header("Panel Yazï¿½larï¿½")]
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private TMP_Text taskSubTitleText;
 
-    [Header("Uyarý Penceresi")]
+    [Header("Uyarï¿½ Penceresi")]
     [SerializeField] private WarningPopupUI warningPopup;
 
     private StageMapItem[] stageItems;
@@ -25,14 +25,30 @@ public class StageMapManager : MonoBehaviour
             .OrderBy(x => x.StageNumber)
             .ToArray();
 
-        currentStage = StageProgress.CurrentStage;
+        if (messageText != null)
+        {
+            messageText.text = "YÃ¼kleniyor...";
+        }
 
-        RefreshStages();
+        StageProgress.Initialize(
+            onReady: () =>
+            {
+                currentStage = StageProgress.CurrentStage;
+                RefreshStages();
+            },
+            onError: message =>
+            {
+                // Sunucuya ulaÅŸÄ±lamazsa gÃ¼venli varsayÄ±lan: yalnÄ±zca 1. aÅŸama aÃ§Ä±k.
+                currentStage = StageProgress.CurrentStage;
+                RefreshStages();
+                ShowMessage(message);
+            }
+        );
     }
 
     public void StageClicked(int clickedStage)
     {
-        // Peþ peþe týklamalarý engeller.
+        // Peï¿½ peï¿½e tï¿½klamalarï¿½ engeller.
         if (isLoadingScene)
         {
             return;
@@ -46,14 +62,14 @@ public class StageMapManager : MonoBehaviour
         if (clickedItem == null)
         {
             Debug.LogError(
-                $"{clickedStage}. aþama için " +
-                "StageMapItem bulunamadý."
+                $"{clickedStage}. aï¿½ama iï¿½in " +
+                "StageMapItem bulunamadï¿½."
             );
 
             return;
         }
 
-        // Henüz açýlmamýþ aþama.
+        // Henï¿½z aï¿½ï¿½lmamï¿½ï¿½ aï¿½ama.
         if (clickedStage > currentStage)
         {
             ShowLockedStageWarning(clickedStage);
@@ -61,8 +77,8 @@ public class StageMapManager : MonoBehaviour
         }
 
         /*
-         * Aktif veya daha önce tamamlanmýþ aþama
-         * tekrar açýlabilir.
+         * Aktif veya daha ï¿½nce tamamlanmï¿½ï¿½ aï¿½ama
+         * tekrar aï¿½ï¿½labilir.
          */
         LoadStageWithLoadingScreen(clickedItem);
     }
@@ -79,7 +95,7 @@ public class StageMapManager : MonoBehaviour
         if (string.IsNullOrWhiteSpace(stage.SceneName))
         {
             ShowMessage(
-                "Bu aþamanýn oyun sahnesi henüz hazýrlanmadý."
+                "Bu aï¿½amanï¿½n oyun sahnesi henï¿½z hazï¿½rlanmadï¿½."
             );
 
             return;
@@ -88,12 +104,12 @@ public class StageMapManager : MonoBehaviour
         if (!Application.CanStreamedLevelBeLoaded(stage.SceneName))
         {
             ShowMessage(
-                "Bu aþamanýn sahnesi henüz kullanýma hazýr deðil."
+                "Bu aï¿½amanï¿½n sahnesi henï¿½z kullanï¿½ma hazï¿½r deï¿½il."
             );
 
             Debug.LogError(
                 $"'{stage.SceneName}' sahnesi Build Profiles " +
-                "içindeki Scene List'te bulunamadý."
+                "iï¿½indeki Scene List'te bulunamadï¿½."
             );
 
             return;
@@ -102,11 +118,11 @@ public class StageMapManager : MonoBehaviour
         if (string.IsNullOrWhiteSpace(loadingSceneName))
         {
             ShowMessage(
-                "Loading sahnesinin adý ayarlanmamýþ."
+                "Loading sahnesinin adï¿½ ayarlanmamï¿½ï¿½."
             );
 
             Debug.LogError(
-                "StageMapManager üzerindeki Loading Scene Name alaný boþ."
+                "StageMapManager ï¿½zerindeki Loading Scene Name alanï¿½ boï¿½."
             );
 
             return;
@@ -115,12 +131,12 @@ public class StageMapManager : MonoBehaviour
         if (!Application.CanStreamedLevelBeLoaded(loadingSceneName))
         {
             ShowMessage(
-                "Yükleme ekraný henüz kullanýma hazýr deðil."
+                "Yï¿½kleme ekranï¿½ henï¿½z kullanï¿½ma hazï¿½r deï¿½il."
             );
 
             Debug.LogError(
                 $"'{loadingSceneName}' sahnesi Build Profiles " +
-                "içindeki Scene List'te bulunamadý."
+                "iï¿½indeki Scene List'te bulunamadï¿½."
             );
 
             return;
@@ -129,16 +145,16 @@ public class StageMapManager : MonoBehaviour
         isLoadingScene = true;
 
         /*
-         * LoadingScene açýlmadan önce, daha sonra
-         * açýlacak gerçek aþamanýn adýný kaydediyoruz.
+         * LoadingScene aï¿½ï¿½lmadan ï¿½nce, daha sonra
+         * aï¿½ï¿½lacak gerï¿½ek aï¿½amanï¿½n adï¿½nï¿½ kaydediyoruz.
          */
         LoadingSceneData.SetTargetScene(
             stage.SceneName
         );
 
         Debug.Log(
-            $"LoadingScene açýlýyor. " +
-            $"Hedef aþama: {stage.SceneName}"
+            $"LoadingScene aï¿½ï¿½lï¿½yor. " +
+            $"Hedef aï¿½ama: {stage.SceneName}"
         );
 
         SceneManager.LoadScene(
@@ -155,14 +171,14 @@ public class StageMapManager : MonoBehaviour
         if (clickedStage == currentStage + 1)
         {
             warningMessage =
-                "Bu aþama henüz hazýr deðil.\n" +
-                $"Önce {currentStage}. aþamayý tamamlayalým.";
+                "Bu aï¿½ama henï¿½z hazï¿½r deï¿½il.\n" +
+                $"ï¿½nce {currentStage}. aï¿½amayï¿½ tamamlayalï¿½m.";
         }
         else
         {
             warningMessage =
-                "Bu aþama henüz hazýr deðil.\n" +
-                "Aþamalarý sýrayla tamamlayalým.";
+                "Bu aï¿½ama henï¿½z hazï¿½r deï¿½il.\n" +
+                "Aï¿½amalarï¿½ sï¿½rayla tamamlayalï¿½m.";
         }
 
         ShowMessage(warningMessage);
@@ -236,14 +252,14 @@ public class StageMapManager : MonoBehaviour
             if (messageText != null)
             {
                 messageText.text =
-                    "Harika! Tüm aþamalarý tamamladýn. " +
-                    "Ýyileþme yolculuðunu baþarýyla bitirdin.";
+                    "Harika! Tï¿½m aï¿½amalarï¿½ tamamladï¿½n. " +
+                    "ï¿½yileï¿½me yolculuï¿½unu baï¿½arï¿½yla bitirdin.";
             }
 
             if (taskSubTitleText != null)
             {
                 taskSubTitleText.text =
-                    "Tüm aþamalar tamamlandý!";
+                    "Tï¿½m aï¿½amalar tamamlandï¿½!";
             }
 
             return;
@@ -258,7 +274,7 @@ public class StageMapManager : MonoBehaviour
         if (taskSubTitleText != null)
         {
             taskSubTitleText.text =
-                $"{currentStage}. aþamayý tamamla.";
+                $"{currentStage}. aï¿½amayï¿½ tamamla.";
         }
     }
 
@@ -270,46 +286,46 @@ public class StageMapManager : MonoBehaviour
         {
             case 1:
                 return
-                    "Ýlk aþamamýz hazýr! " +
-                    "Ameliyat Öncesi Hazýrlýk bölümüne " +
-                    "dokunarak baþlayalým.";
+                    "ï¿½lk aï¿½amamï¿½z hazï¿½r! " +
+                    "Ameliyat ï¿½ncesi Hazï¿½rlï¿½k bï¿½lï¿½mï¿½ne " +
+                    "dokunarak baï¿½layalï¿½m.";
 
             case 2:
                 return
                     "Harika gidiyorsun! " +
-                    "Þimdi Ameliyat Günü aþamasýna geçebilirsin.";
+                    "ï¿½imdi Ameliyat Gï¿½nï¿½ aï¿½amasï¿½na geï¿½ebilirsin.";
 
             case 3:
                 return
-                    "Çok güzel! Þimdi ameliyat sonrasý " +
-                    "fiziksel aktiviteleri öðrenelim.";
+                    "ï¿½ok gï¿½zel! ï¿½imdi ameliyat sonrasï¿½ " +
+                    "fiziksel aktiviteleri ï¿½ï¿½renelim.";
 
             case 4:
                 return
-                    "Þimdi kalbimizi koruyan saðlýklý " +
-                    "besinleri keþfedelim.";
+                    "ï¿½imdi kalbimizi koruyan saï¿½lï¿½klï¿½ " +
+                    "besinleri keï¿½fedelim.";
 
             case 5:
                 return
-                    "Ýlaçlarý doðru zamanda ve doðru þekilde " +
-                    "kullanmayý öðrenelim.";
+                    "ï¿½laï¿½larï¿½ doï¿½ru zamanda ve doï¿½ru ï¿½ekilde " +
+                    "kullanmayï¿½ ï¿½ï¿½renelim.";
 
             case 6:
                 return
-                    "Acil bir durumda ne yapman gerektiðini " +
-                    "birlikte öðrenelim.";
+                    "Acil bir durumda ne yapman gerektiï¿½ini " +
+                    "birlikte ï¿½ï¿½renelim.";
 
             case 7:
                 return
-                    "Son aþamadayýz! Saðlýðýný kendi baþýna " +
-                    "yönetmenin önemini öðrenelim.";
+                    "Son aï¿½amadayï¿½z! Saï¿½lï¿½ï¿½ï¿½nï¿½ kendi baï¿½ï¿½na " +
+                    "yï¿½netmenin ï¿½nemini ï¿½ï¿½renelim.";
 
             default:
                 return "";
         }
     }
 
-    [ContextMenu("Haritayý Yenile")]
+    [ContextMenu("Haritayï¿½ Yenile")]
     public void RefreshMap()
     {
         currentStage =
@@ -320,7 +336,7 @@ public class StageMapManager : MonoBehaviour
         RefreshStages();
     }
 
-    [ContextMenu("Ýlerlemeyi Sýfýrla")]
+    [ContextMenu("ï¿½lerlemeyi Sï¿½fï¿½rla")]
     public void ResetSavedProgress()
     {
         StageProgress.ResetProgress();

@@ -77,6 +77,8 @@ public class Stage2OrderManager : MonoBehaviour
 
     private void Start()
     {
+        StageProgress.EnterStage(stageNumber);
+
         if (debugSkipEnabled)
         {
             DebugJumpToPhase(debugStartPhase);

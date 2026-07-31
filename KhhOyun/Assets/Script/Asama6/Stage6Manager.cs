@@ -16,12 +16,12 @@ public class Stage6Manager : MonoBehaviour
         Tamamlandi
     }
 
-    [Header("Baþlangýç Durumu")]
+    [Header("Baï¿½langï¿½ï¿½ Durumu")]
     [SerializeField]
     private Stage6Step currentStep =
         Stage6Step.GirisBilgilendirmesi;
 
-    [Header("Genel Süreler")]
+    [Header("Genel Sï¿½reler")]
     [SerializeField]
     private float popupFadeDuration = 0.65f;
 
@@ -44,22 +44,22 @@ public class Stage6Manager : MonoBehaviour
     private float betweenStepsDelay = 2f;
 
     // --------------------------------------------------
-    // EÐÝTÝM PANELÝ
+    // Eï¿½ï¿½Tï¿½M PANELï¿½
     // --------------------------------------------------
 
-    [Header("Eðitim")]
-    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    [Header("Eï¿½itim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileï¿½eni.")]
     public EducationPanelUI educationPanel;
 
-    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [Tooltip("EducationPanelUI iï¿½indeki Steps listesinde kullanï¿½lacak adï¿½m kimliï¿½i.")]
     [SerializeField]
     private string educationStepId = "asama6_egitim1";
 
     // --------------------------------------------------
-    // BAÞLANGIÇ BÝLGÝLENDÝRME PANELÝ
+    // BAï¿½LANGIï¿½ Bï¿½LGï¿½LENDï¿½RME PANELï¿½
     // --------------------------------------------------
 
-    [Header("Baþlangýç Bilgilendirme Paneli")]
+    [Header("Baï¿½langï¿½ï¿½ Bilgilendirme Paneli")]
     public GameObject introPanel;
 
     public CanvasGroup introCanvasGroup;
@@ -67,61 +67,61 @@ public class Stage6Manager : MonoBehaviour
     [SerializeField]
     private float introFadeDuration = 0.8f;
 
-    [Header("Bilgilendirme Paneli Açýklamasý")]
+    [Header("Bilgilendirme Paneli Aï¿½ï¿½klamasï¿½")]
     public TMP_Text introDescriptionText;
 
     [TextArea(3, 6)]
     public string introDescription =
-        "Acil durum belirtilerini taný!\n" +
-        "Kendini kötü hissettiðinde doðru seçimi " +
-        "yaparak yardým istemelisin.";
+        "Acil durum belirtilerini tanï¿½!\n" +
+        "Kendini kï¿½tï¿½ hissettiï¿½inde doï¿½ru seï¿½imi " +
+        "yaparak yardï¿½m istemelisin.";
 
     // --------------------------------------------------
-    // ÜST PANELLER
+    // ï¿½ST PANELLER
     // --------------------------------------------------
 
-    [Header("Sol Üst Bilgilendirme Paneli")]
+    [Header("Sol ï¿½st Bilgilendirme Paneli")]
     public TMP_Text topLeftMessageText;
 
-    [Header("Sað Üst Görev Paneli")]
+    [Header("Saï¿½ ï¿½st Gï¿½rev Paneli")]
     public TMP_Text topRightTitleText;
     public TMP_Text topRightDescriptionText;
 
     // --------------------------------------------------
-    // NORMAL ÇOCUK
+    // NORMAL ï¿½OCUK
     // --------------------------------------------------
 
-    [Header("Normal Çocuk")]
+    [Header("Normal ï¿½ocuk")]
     public GameObject normalChild;
 
     // --------------------------------------------------
-    // NEFES DARLIÐI
+    // NEFES DARLIï¿½I
     // --------------------------------------------------
 
-    [Header("Nefes Darlýðý")]
+    [Header("Nefes Darlï¿½ï¿½ï¿½")]
     public GameObject breathChild;
     public GameObject breathSpeechBubble;
     public GameObject breathChoicePanel;
 
-    [Header("Nefes Seçim Butonlarý")]
+    [Header("Nefes Seï¿½im Butonlarï¿½")]
     public Stage6ChoiceButton breathContinueButton;
     public Stage6ChoiceButton breathHideButton;
     public Stage6ChoiceButton breathHelpButton;
 
-    [Header("Nefes Darlýðý Baþarý Popupý")]
+    [Header("Nefes Darlï¿½ï¿½ï¿½ Baï¿½arï¿½ Popupï¿½")]
     public GameObject breathCorrectPopup;
     public CanvasGroup breathCorrectPopupCanvasGroup;
 
     // --------------------------------------------------
-    // GÖÐÜS AÐRISI
+    // Gï¿½ï¿½ï¿½S Aï¿½RISI
     // --------------------------------------------------
 
-    [Header("Göðüs Aðrýsý")]
+    [Header("Gï¿½ï¿½ï¿½s Aï¿½rï¿½sï¿½")]
     public GameObject chestPainChild;
     public GameObject chestPainSpeechBubble;
     public GameObject chestPainPanel;
 
-    [Header("Göðüs Aðrýsý Sayaç Görselleri")]
+    [Header("Gï¿½ï¿½ï¿½s Aï¿½rï¿½sï¿½ Sayaï¿½ Gï¿½rselleri")]
     public GameObject chestCountdown3;
     public GameObject chestCountdown2;
     public GameObject chestCountdown1;
@@ -129,11 +129,11 @@ public class Stage6Manager : MonoBehaviour
     [SerializeField]
     private float chestCountdownStepDuration = 1.2f;
 
-    [Header("Göðüs Aðrýsý Baþarý Popupý")]
+    [Header("Gï¿½ï¿½ï¿½s Aï¿½rï¿½sï¿½ Baï¿½arï¿½ Popupï¿½")]
     public GameObject chestCorrectPopup;
     public CanvasGroup chestCorrectPopupCanvasGroup;
 
-    [Header("Göðüs Aðrýsý Tekrar Popupý")]
+    [Header("Gï¿½ï¿½ï¿½s Aï¿½rï¿½sï¿½ Tekrar Popupï¿½")]
     public GameObject chestRetryPopup;
     public CanvasGroup chestRetryPopupCanvasGroup;
 
@@ -150,15 +150,15 @@ public class Stage6Manager : MonoBehaviour
     private float chestButtonToCountdownDelay = 0.6f;
 
     // --------------------------------------------------
-    // BAÞ DÖNMESÝ
+    // BAï¿½ Dï¿½NMESï¿½
     // --------------------------------------------------
 
-    [Header("Baþ Dönmesi")]
+    [Header("Baï¿½ Dï¿½nmesi")]
     public GameObject dizzinessChild;
     public GameObject dizzinessSpeechBubble;
     public GameObject balancePanel;
 
-    [Header("Denge Mekaniði")]
+    [Header("Denge Mekaniï¿½i")]
     public RectTransform balanceMarker;
 
     [SerializeField]
@@ -179,34 +179,34 @@ public class Stage6Manager : MonoBehaviour
     [SerializeField]
     private float balanceMoveDuration = 0.25f;
 
-    [Header("Denge Baþarý Popupý")]
+    [Header("Denge Baï¿½arï¿½ Popupï¿½")]
     public GameObject balanceCorrectPopup;
     public CanvasGroup balanceCorrectPopupCanvasGroup;
 
-    [Header("Denge Tekrar Popupý")]
+    [Header("Denge Tekrar Popupï¿½")]
     public GameObject balanceRetryPopup;
     public CanvasGroup balanceRetryPopupCanvasGroup;
 
     // --------------------------------------------------
-    // SON SEÇÝM
+    // SON SEï¿½ï¿½M
     // --------------------------------------------------
 
-    [Header("Son Seçim")]
+    [Header("Son Seï¿½im")]
     public GameObject finalChoicePanel;
 
-    [Header("Son Seçim Butonlarý")]
+    [Header("Son Seï¿½im Butonlarï¿½")]
     public Stage6ChoiceButton familyChoiceButton;
     public Stage6ChoiceButton healthPointChoiceButton;
 
-    [Header("Son Seçim Geri Bildirim Panelleri")]
-    [Tooltip("Ailem seçildiðinde açýlacak küçük uyarý paneli.")]
+    [Header("Son Seï¿½im Geri Bildirim Panelleri")]
+    [Tooltip("Ailem seï¿½ildiï¿½inde aï¿½ï¿½lacak kï¿½ï¿½ï¿½k uyarï¿½ paneli.")]
     public GameObject finalWarningPanel;
 
-    [Tooltip("Çocuk ve ailesi buluþtuktan sonra açýlacak baþarý paneli.")]
+    [Tooltip("ï¿½ocuk ve ailesi buluï¿½tuktan sonra aï¿½ï¿½lacak baï¿½arï¿½ paneli.")]
     public GameObject finalSuccessPanel;
 
-    [Header("Ailem Butonu Yanlýþ Seçim Görünümü")]
-    [Tooltip("Ailem butonunun ana Image bileþeni. Alfa azaltýlmaz; renk doðrudan deðiþtirilir.")]
+    [Header("Ailem Butonu Yanlï¿½ï¿½ Seï¿½im Gï¿½rï¿½nï¿½mï¿½")]
+    [Tooltip("Ailem butonunun ana Image bileï¿½eni. Alfa azaltï¿½lmaz; renk doï¿½rudan deï¿½iï¿½tirilir.")]
     public Image familyChoiceImage;
 
     [SerializeField]
@@ -219,19 +219,19 @@ public class Stage6Manager : MonoBehaviour
     [Header("Final Hareket Hedefleri")]
     public RectTransform normalChildRect;
 
-    [Tooltip("Saðlýk merkezi önünde duran ayakta çocuk objesi.")]
+    [Tooltip("Saï¿½lï¿½k merkezi ï¿½nï¿½nde duran ayakta ï¿½ocuk objesi.")]
     public GameObject standingChild;
 
-    [Tooltip("cocukson objesinin RectTransform bileþeni.")]
+    [Tooltip("cocukson objesinin RectTransform bileï¿½eni.")]
     public RectTransform standingChildRect;
 
-    [Tooltip("Bisikletli çocuðun saðlýk merkezine giderken ulaþacaðý görünmez hedef.")]
+    [Tooltip("Bisikletli ï¿½ocuï¿½un saï¿½lï¿½k merkezine giderken ulaï¿½acaï¿½ï¿½ gï¿½rï¿½nmez hedef.")]
     public RectTransform bikeArrivalPoint;
 
     public RectTransform familyRectTransform;
     public RectTransform familyTargetPoint;
 
-    [Tooltip("cocuknormal üzerindeki BicycleIdleMotion scriptini buraya atayýn.")]
+    [Tooltip("cocuknormal ï¿½zerindeki BicycleIdleMotion scriptini buraya atayï¿½n.")]
     public MonoBehaviour normalChildIdleMotion;
 
     [SerializeField]
@@ -244,7 +244,7 @@ public class Stage6Manager : MonoBehaviour
     [SerializeField]
     private float familyMoveDuration = 2.3f;
 
-    [Tooltip("Çocuk ayakta hâline geçtikten sonra ailenin harekete baþlamadan önce bekleyeceði süre.")]
+    [Tooltip("ï¿½ocuk ayakta hï¿½line geï¿½tikten sonra ailenin harekete baï¿½lamadan ï¿½nce bekleyeceï¿½i sï¿½re.")]
     [SerializeField]
     private float familyMoveStartDelay = 0.8f;
 
@@ -255,7 +255,7 @@ public class Stage6Manager : MonoBehaviour
     public GameObject finalCongratulationsPanel;
     public GameObject familyCharacters;
 
-    [Header("Aþama Geçiþi")]
+    [Header("Aï¿½ama Geï¿½iï¿½i")]
     [SerializeField]
     private int stageNumber = 6;
 
@@ -294,6 +294,8 @@ public class Stage6Manager : MonoBehaviour
 
     private void Start()
     {
+        StageProgress.EnterStage(stageNumber);
+
         PrepareScene();
 
         mainSequence = StartCoroutine(
@@ -307,7 +309,7 @@ public class Stage6Manager : MonoBehaviour
 
         HideAllGameplayObjects();
 
-        // Eðitim sýrasýnda yalnýzca normal bisikletli çocuk görünür.
+        // Eï¿½itim sï¿½rasï¿½nda yalnï¿½zca normal bisikletli ï¿½ocuk gï¿½rï¿½nï¿½r.
         SetActiveSafe(
             normalChild,
             true
@@ -323,12 +325,12 @@ public class Stage6Manager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Stage6Manager: Education Panel atanmadý. " +
-                "Aþama 6 eðitimi atlanýyor."
+                "Stage6Manager: Education Panel atanmadï¿½. " +
+                "Aï¿½ama 6 eï¿½itimi atlanï¿½yor."
             );
         }
 
-        // Eðitim kapanýnca mevcut Aþama 6 baþlangýç akýþýna devam edilir.
+        // Eï¿½itim kapanï¿½nca mevcut Aï¿½ama 6 baï¿½langï¿½ï¿½ akï¿½ï¿½ï¿½na devam edilir.
         yield return StartCoroutine(
             StartStage6Intro()
         );
@@ -390,7 +392,7 @@ public class Stage6Manager : MonoBehaviour
     }
 
     // --------------------------------------------------
-    // BAÞLANGIÇ BÝLGÝLENDÝRMESÝ
+    // BAï¿½LANGIï¿½ Bï¿½LGï¿½LENDï¿½RMESï¿½
     // --------------------------------------------------
 
     private IEnumerator StartStage6Intro()
@@ -403,7 +405,7 @@ public class Stage6Manager : MonoBehaviour
 
         HideAllGameplayObjects();
 
-        // Bilgilendirme sýrasýnda normal çocuk görünür.
+        // Bilgilendirme sï¿½rasï¿½nda normal ï¿½ocuk gï¿½rï¿½nï¿½r.
         SetActiveSafe(
             normalChild,
             true
@@ -443,7 +445,7 @@ public class Stage6Manager : MonoBehaviour
             introCanvasGroup.blocksRaycasts = true;
         }
 
-        // Tamam butonuna basýlmasýný bekler.
+        // Tamam butonuna basï¿½lmasï¿½nï¿½ bekler.
         yield return new WaitUntil(
             () => introConfirmed
         );
@@ -478,8 +480,8 @@ public class Stage6Manager : MonoBehaviour
     }
 
     /// <summary>
-    /// WarningPopup içindeki Tamam butonunun
-    /// OnClick olayýna atanmalýdýr.
+    /// WarningPopup iï¿½indeki Tamam butonunun
+    /// OnClick olayï¿½na atanmalï¿½dï¿½r.
     /// </summary>
     public void ConfirmIntro()
     {
@@ -500,7 +502,7 @@ public class Stage6Manager : MonoBehaviour
     }
 
     // --------------------------------------------------
-    // SEÇÝM YÖNETÝMÝ
+    // SEï¿½ï¿½M Yï¿½NETï¿½Mï¿½
     // --------------------------------------------------
 
     public void MakeChoice(
@@ -555,7 +557,7 @@ public class Stage6Manager : MonoBehaviour
     }
 
     // --------------------------------------------------
-    // NEFES DARLIÐI
+    // NEFES DARLIï¿½I
     // --------------------------------------------------
 
     private IEnumerator StartBreathStepSequence()
@@ -570,7 +572,7 @@ public class Stage6Manager : MonoBehaviour
 
         UpdateTopPanelsForBreathWaiting();
 
-        // Önce normal sürüþ.
+        // ï¿½nce normal sï¿½rï¿½ï¿½.
         SetActiveSafe(
             normalChild,
             true
@@ -585,7 +587,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Nefes darlýðý karakteri.
+        // Nefes darlï¿½ï¿½ï¿½ karakteri.
         SetActiveSafe(
             breathChild,
             true
@@ -597,7 +599,7 @@ public class Stage6Manager : MonoBehaviour
             childToBubbleDelay
         );
 
-        // Konuþma balonu. CanvasGroup varsa görünürlüðü de sýfýrlanýr.
+        // Konuï¿½ma balonu. CanvasGroup varsa gï¿½rï¿½nï¿½rlï¿½ï¿½ï¿½ de sï¿½fï¿½rlanï¿½r.
         ShowObject(
             breathSpeechBubble
         );
@@ -606,7 +608,7 @@ public class Stage6Manager : MonoBehaviour
             bubbleToChoiceDelay
         );
 
-        // Seçim paneli.
+        // Seï¿½im paneli.
         ShowObject(
             breathChoicePanel
         );
@@ -616,7 +618,7 @@ public class Stage6Manager : MonoBehaviour
         inputLocked = false;
 
         Debug.Log(
-            "Nefes darlýðý seçimleri açýldý."
+            "Nefes darlï¿½ï¿½ï¿½ seï¿½imleri aï¿½ï¿½ldï¿½."
         );
     }
 
@@ -666,7 +668,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Doðru seçimde çocuk normal bisikletli hâline döner.
+        // Doï¿½ru seï¿½imde ï¿½ocuk normal bisikletli hï¿½line dï¿½ner.
         SetActiveSafe(
             breathChild,
             false
@@ -705,7 +707,7 @@ public class Stage6Manager : MonoBehaviour
             breathCorrectPopupCanvasGroup
         );
 
-        // Popup, içindeki butona basýlmadan kapanmaz.
+        // Popup, iï¿½indeki butona basï¿½lmadan kapanmaz.
         yield return new WaitUntil(
             () => breathSuccessConfirmed
         );
@@ -746,7 +748,7 @@ public class Stage6Manager : MonoBehaviour
     }
 
     /// <summary>
-    /// Nefes baþarý popupýndaki devam/tamam butonuna atanýr.
+    /// Nefes baï¿½arï¿½ popupï¿½ndaki devam/tamam butonuna atanï¿½r.
     /// </summary>
     public void ConfirmBreathSuccess()
     {
@@ -780,7 +782,7 @@ public class Stage6Manager : MonoBehaviour
     }
 
     // --------------------------------------------------
-    // GÖÐÜS AÐRISI
+    // Gï¿½ï¿½ï¿½S Aï¿½RISI
     // --------------------------------------------------
 
     private IEnumerator StartChestPainStepSequence()
@@ -796,7 +798,7 @@ public class Stage6Manager : MonoBehaviour
 
         UpdateTopPanelsForChestPainWaiting();
 
-        // Önce normal çocuk kýsa süre görünür.
+        // ï¿½nce normal ï¿½ocuk kï¿½sa sï¿½re gï¿½rï¿½nï¿½r.
         SetActiveSafe(
             normalChild,
             true
@@ -811,7 +813,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Göðüs aðrýsý karakteri görünür.
+        // Gï¿½ï¿½ï¿½s aï¿½rï¿½sï¿½ karakteri gï¿½rï¿½nï¿½r.
         SetActiveSafe(
             chestPainChild,
             true
@@ -823,7 +825,7 @@ public class Stage6Manager : MonoBehaviour
             chestChildToBubbleDelay
         );
 
-        // Göðsüm aðrýyor konuþma balonu.
+        // Gï¿½ï¿½sï¿½m aï¿½rï¿½yor konuï¿½ma balonu.
         SetActiveSafe(
             chestPainSpeechBubble,
             true
@@ -833,7 +835,7 @@ public class Stage6Manager : MonoBehaviour
             chestBubbleToButtonDelay
         );
 
-        // Yardým Ýste paneli.
+        // Yardï¿½m ï¿½ste paneli.
         ShowObject(
             chestPainPanel
         );
@@ -847,7 +849,7 @@ public class Stage6Manager : MonoBehaviour
         StartChestCountdown();
 
         Debug.Log(
-            "Göðüs aðrýsý bölümü baþladý."
+            "Gï¿½ï¿½ï¿½s aï¿½rï¿½sï¿½ bï¿½lï¿½mï¿½ baï¿½ladï¿½."
         );
     }
 
@@ -926,7 +928,7 @@ public class Stage6Manager : MonoBehaviour
 
         chestCountdownCoroutine = null;
 
-        // Süre doldu.
+        // Sï¿½re doldu.
         yield return StartCoroutine(
             ShowChestRetryPopup()
         );
@@ -960,7 +962,7 @@ public class Stage6Manager : MonoBehaviour
         );
 
         Debug.Log(
-            "Yardým iste butonuna zamanýnda basýldý."
+            "Yardï¿½m iste butonuna zamanï¿½nda basï¿½ldï¿½."
         );
     }
 
@@ -981,7 +983,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Baþarýda çocuk normal bisikletli hâline döner.
+        // Baï¿½arï¿½da ï¿½ocuk normal bisikletli hï¿½line dï¿½ner.
         SetActiveSafe(
             chestPainChild,
             false
@@ -1020,7 +1022,7 @@ public class Stage6Manager : MonoBehaviour
             chestCorrectPopupCanvasGroup
         );
 
-        // Baþarý popupý butona basýlmadan kapanmaz.
+        // Baï¿½arï¿½ popupï¿½ butona basï¿½lmadan kapanmaz.
         yield return new WaitUntil(
             () => chestSuccessConfirmed
         );
@@ -1059,7 +1061,7 @@ public class Stage6Manager : MonoBehaviour
     }
 
     /// <summary>
-    /// Göðüs baþarý popupýndaki devam/tamam butonuna atanýr.
+    /// Gï¿½ï¿½ï¿½s baï¿½arï¿½ popupï¿½ndaki devam/tamam butonuna atanï¿½r.
     /// </summary>
     public void ConfirmChestSuccess()
     {
@@ -1082,7 +1084,7 @@ public class Stage6Manager : MonoBehaviour
 
         HideChestCountdownObjects();
 
-        // Baþarýsýz durumda çocuk göðüs aðrýsý hâlinde kalýr.
+        // Baï¿½arï¿½sï¿½z durumda ï¿½ocuk gï¿½ï¿½ï¿½s aï¿½rï¿½sï¿½ hï¿½linde kalï¿½r.
         SetActiveSafe(
             chestPainChild,
             true
@@ -1111,7 +1113,7 @@ public class Stage6Manager : MonoBehaviour
             chestRetryPopup
         );
 
-        // Popup açýldýðýnda göðüs aðrýsý yaþayan çocuk
+        // Popup aï¿½ï¿½ldï¿½ï¿½ï¿½nda gï¿½ï¿½ï¿½s aï¿½rï¿½sï¿½ yaï¿½ayan ï¿½ocuk
         // kesinlikle ekranda kalmaya devam eder.
         SetActiveSafe(
             chestPainChild,
@@ -1143,9 +1145,9 @@ public class Stage6Manager : MonoBehaviour
             chestRetryPopupCanvasGroup
         );
 
-        // Tekrar dene butonuna basýlana kadar popup açýk kalýr.
-        // Bu sýrada baþka bir iþlem karakteri kapatsa bile
-        // göðüs aðrýsý yaþayan çocuk tekrar aktif tutulur.
+        // Tekrar dene butonuna basï¿½lana kadar popup aï¿½ï¿½k kalï¿½r.
+        // Bu sï¿½rada baï¿½ka bir iï¿½lem karakteri kapatsa bile
+        // gï¿½ï¿½ï¿½s aï¿½rï¿½sï¿½ yaï¿½ayan ï¿½ocuk tekrar aktif tutulur.
         while (!chestRetryConfirmed)
         {
             SetActiveSafe(
@@ -1179,7 +1181,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Popup kapandýktan sonra da çocuk ayný durumda kalýr.
+        // Popup kapandï¿½ktan sonra da ï¿½ocuk aynï¿½ durumda kalï¿½r.
         SetActiveSafe(
             chestPainChild,
             true
@@ -1194,7 +1196,7 @@ public class Stage6Manager : MonoBehaviour
             afterAlertDelay
         );
 
-        // Önce konuþma balonu yeniden görünür.
+        // ï¿½nce konuï¿½ma balonu yeniden gï¿½rï¿½nï¿½r.
         ShowObject(
             chestPainSpeechBubble
         );
@@ -1203,7 +1205,7 @@ public class Stage6Manager : MonoBehaviour
             chestBubbleToButtonDelay
         );
 
-        // Sonra yardým butonu yeniden açýlýr.
+        // Sonra yardï¿½m butonu yeniden aï¿½ï¿½lï¿½r.
         ShowObject(
             chestPainPanel
         );
@@ -1218,12 +1220,12 @@ public class Stage6Manager : MonoBehaviour
         StartChestCountdown();
 
         Debug.Log(
-            "Göðüs aðrýsý görevi yeniden baþladý."
+            "Gï¿½ï¿½ï¿½s aï¿½rï¿½sï¿½ gï¿½revi yeniden baï¿½ladï¿½."
         );
     }
 
     /// <summary>
-    /// Göðüs tekrar popupýndaki tekrar dene/tamam butonuna atanýr.
+    /// Gï¿½ï¿½ï¿½s tekrar popupï¿½ndaki tekrar dene/tamam butonuna atanï¿½r.
     /// </summary>
     public void ConfirmChestRetry()
     {
@@ -1271,7 +1273,7 @@ public class Stage6Manager : MonoBehaviour
     }
 
     // --------------------------------------------------
-    // BAÞ DÖNMESÝ
+    // BAï¿½ Dï¿½NMESï¿½
     // --------------------------------------------------
 
     private void StartDizzinessStep()
@@ -1295,7 +1297,7 @@ public class Stage6Manager : MonoBehaviour
         HideAllGameplayObjects(true);
         ResetBalanceMarker();
 
-        // Önce kýsa süre normal sürüþ görünür.
+        // ï¿½nce kï¿½sa sï¿½re normal sï¿½rï¿½ï¿½ gï¿½rï¿½nï¿½r.
         SetActiveSafe(
             normalChild,
             true
@@ -1310,7 +1312,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Baþ dönmesi yaþayan çocuk görünür.
+        // Baï¿½ dï¿½nmesi yaï¿½ayan ï¿½ocuk gï¿½rï¿½nï¿½r.
         SetActiveSafe(
             dizzinessChild,
             true
@@ -1320,7 +1322,7 @@ public class Stage6Manager : MonoBehaviour
             childToBubbleDelay
         );
 
-        // Baþým dönüyor konuþma balonu.
+        // Baï¿½ï¿½m dï¿½nï¿½yor konuï¿½ma balonu.
         SetActiveSafe(
             dizzinessSpeechBubble,
             true
@@ -1330,7 +1332,7 @@ public class Stage6Manager : MonoBehaviour
             bubbleToChoiceDelay
         );
 
-        // Denge paneli ve yön butonlarý açýlýr.
+        // Denge paneli ve yï¿½n butonlarï¿½ aï¿½ï¿½lï¿½r.
         SetActiveSafe(
             balancePanel,
             true
@@ -1339,7 +1341,7 @@ public class Stage6Manager : MonoBehaviour
         inputLocked = false;
 
         Debug.Log(
-            "Baþ dönmesi ve denge bölümü baþladý."
+            "Baï¿½ dï¿½nmesi ve denge bï¿½lï¿½mï¿½ baï¿½ladï¿½."
         );
     }
 
@@ -1376,7 +1378,7 @@ public class Stage6Manager : MonoBehaviour
         if (balanceMarker == null)
         {
             Debug.LogError(
-                "Stage6Manager: Balance Marker alanýna hareket edecek denge ayracý atanmadý."
+                "Stage6Manager: Balance Marker alanï¿½na hareket edecek denge ayracï¿½ atanmadï¿½."
             );
 
             return;
@@ -1450,7 +1452,7 @@ public class Stage6Manager : MonoBehaviour
         float currentX =
             balanceMarker.anchoredPosition.x;
 
-        // Ayracýn orta güvenli alana gelmesi baþarýdýr.
+        // Ayracï¿½n orta gï¿½venli alana gelmesi baï¿½arï¿½dï¿½r.
         if (
             Mathf.Abs(currentX) <=
             balanceSuccessHalfWidth
@@ -1463,7 +1465,7 @@ public class Stage6Manager : MonoBehaviour
             yield break;
         }
 
-        // Ayracýn kýrmýzý uçlardan birine ulaþmasý baþarýsýzlýktýr.
+        // Ayracï¿½n kï¿½rmï¿½zï¿½ uï¿½lardan birine ulaï¿½masï¿½ baï¿½arï¿½sï¿½zlï¿½ktï¿½r.
         bool reachedDangerEdge =
             currentX <= balanceMinX + 0.01f ||
             currentX >= balanceMaxX - 0.01f;
@@ -1497,7 +1499,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Baþarýlý olduðunda çocuk normal bisikletli hâline döner.
+        // Baï¿½arï¿½lï¿½ olduï¿½unda ï¿½ocuk normal bisikletli hï¿½line dï¿½ner.
         SetActiveSafe(
             dizzinessChild,
             false
@@ -1536,7 +1538,7 @@ public class Stage6Manager : MonoBehaviour
             balanceCorrectPopupCanvasGroup
         );
 
-        // Baþarý popupý butona basýlmadan kapanmaz.
+        // Baï¿½arï¿½ popupï¿½ butona basï¿½lmadan kapanmaz.
         yield return new WaitUntil(
             () => balanceSuccessConfirmed
         );
@@ -1594,7 +1596,7 @@ public class Stage6Manager : MonoBehaviour
 
         StopBalanceMovement();
 
-        // Baþarýsýz durumda baþý dönen çocuk ekranda kalýr.
+        // Baï¿½arï¿½sï¿½z durumda baï¿½ï¿½ dï¿½nen ï¿½ocuk ekranda kalï¿½r.
         SetActiveSafe(
             dizzinessChild,
             true
@@ -1643,7 +1645,7 @@ public class Stage6Manager : MonoBehaviour
             balanceRetryPopupCanvasGroup
         );
 
-        // Tekrar dene butonuna basýlana kadar popup ve çocuk açýk kalýr.
+        // Tekrar dene butonuna basï¿½lana kadar popup ve ï¿½ocuk aï¿½ï¿½k kalï¿½r.
         while (!balanceRetryConfirmed)
         {
             SetActiveSafe(
@@ -1677,7 +1679,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Yeniden denemede çocuk baþ dönmesi hâlinde kalýr.
+        // Yeniden denemede ï¿½ocuk baï¿½ dï¿½nmesi hï¿½linde kalï¿½r.
         SetActiveSafe(
             dizzinessChild,
             true
@@ -1711,7 +1713,7 @@ public class Stage6Manager : MonoBehaviour
         inputLocked = false;
 
         Debug.Log(
-            "Denge görevi yeniden baþladý."
+            "Denge gï¿½revi yeniden baï¿½ladï¿½."
         );
     }
 
@@ -1821,12 +1823,12 @@ public class Stage6Manager : MonoBehaviour
         inputLocked = false;
 
         Debug.Log(
-            "Son seçim bölümü baþladý."
+            "Son seï¿½im bï¿½lï¿½mï¿½ baï¿½ladï¿½."
         );
     }
 
     // --------------------------------------------------
-    // SON SEÇÝM
+    // SON SEï¿½ï¿½M
     // --------------------------------------------------
 
     private void HandleFinalChoice(
@@ -1839,19 +1841,19 @@ public class Stage6Manager : MonoBehaviour
             Stage6ChoiceButton.ChoiceType.Aile
         )
         {
-            // CanvasGroup alpha azaltmak yerine butonun gerçek rengi deðiþtirilir.
-            // Böylece ana panelin içinde basýlý duran eski buton görseli ortaya çýkmaz.
+            // CanvasGroup alpha azaltmak yerine butonun gerï¿½ek rengi deï¿½iï¿½tirilir.
+            // Bï¿½ylece ana panelin iï¿½inde basï¿½lï¿½ duran eski buton gï¿½rseli ortaya ï¿½ï¿½kmaz.
             SetFamilyChoiceWrongVisual();
 
-            // Küçük uyarý paneli açýlýr.
-            // Saðlýk Noktasý seçeneði kullanýlmaya devam edebilir.
+            // Kï¿½ï¿½ï¿½k uyarï¿½ paneli aï¿½ï¿½lï¿½r.
+            // Saï¿½lï¿½k Noktasï¿½ seï¿½eneï¿½i kullanï¿½lmaya devam edebilir.
             SetActiveSafe(
                 finalWarningPanel,
                 true
             );
 
             Debug.Log(
-                "Önce saðlýk noktasýna gitmelisin."
+                "ï¿½nce saï¿½lï¿½k noktasï¿½na gitmelisin."
             );
 
             return;
@@ -1908,13 +1910,13 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Aile, çocuk hedefe ulaþana kadar gizli kalýr.
+        // Aile, ï¿½ocuk hedefe ulaï¿½ana kadar gizli kalï¿½r.
         SetActiveSafe(
             familyCharacters,
             false
         );
 
-        // Final hareketi baþladýðýnda bisiklet salýnýmý durdurulur.
+        // Final hareketi baï¿½ladï¿½ï¿½ï¿½nda bisiklet salï¿½nï¿½mï¿½ durdurulur.
         if (normalChildIdleMotion != null)
         {
             normalChildIdleMotion.enabled = false;
@@ -1931,7 +1933,7 @@ public class Stage6Manager : MonoBehaviour
         )
         {
             Debug.LogError(
-                "Stage6Manager: Normal Child Rect veya Bike Arrival Point atanmamýþ."
+                "Stage6Manager: Normal Child Rect veya Bike Arrival Point atanmamï¿½ï¿½."
             );
         }
 
@@ -1941,7 +1943,7 @@ public class Stage6Manager : MonoBehaviour
         )
         {
             Debug.LogError(
-                "Stage6Manager: Standing Child veya Standing Child Rect atanmamýþ."
+                "Stage6Manager: Standing Child veya Standing Child Rect atanmamï¿½ï¿½."
             );
         }
 
@@ -1951,7 +1953,7 @@ public class Stage6Manager : MonoBehaviour
         )
         {
             Debug.LogError(
-                "Stage6Manager: Family Rect Transform veya Family Target Point atanmamýþ."
+                "Stage6Manager: Family Rect Transform veya Family Target Point atanmamï¿½ï¿½."
             );
         }
 
@@ -2022,7 +2024,7 @@ public class Stage6Manager : MonoBehaviour
         }
 
         // --------------------------------------------------
-        // 1. ÖNCE BÝSÝKLETLÝ ÇOCUK SAÐLIK NOKTASINA GÝDER
+        // 1. ï¿½NCE Bï¿½Sï¿½KLETLï¿½ ï¿½OCUK SAï¿½LIK NOKTASINA Gï¿½DER
         // --------------------------------------------------
 
         float childElapsedTime = 0f;
@@ -2079,7 +2081,7 @@ public class Stage6Manager : MonoBehaviour
                 childEndSize;
         }
 
-        // Bisikletli çocuk hedefe ulaþýnca ayakta çocuk görünür.
+        // Bisikletli ï¿½ocuk hedefe ulaï¿½ï¿½nca ayakta ï¿½ocuk gï¿½rï¿½nï¿½r.
         SetActiveSafe(
             normalChild,
             false
@@ -2090,13 +2092,13 @@ public class Stage6Manager : MonoBehaviour
             true
         );
 
-        // Çocuðun dönüþümünün anlaþýlmasý için kýsa bekleme.
+        // ï¿½ocuï¿½un dï¿½nï¿½ï¿½ï¿½mï¿½nï¿½n anlaï¿½ï¿½lmasï¿½ iï¿½in kï¿½sa bekleme.
         yield return new WaitForSeconds(
             familyMoveStartDelay
         );
 
         // --------------------------------------------------
-        // 2. SONRA AÝLE EKRANIN SAÐINDAN ÇOCUÐUN YANINA GELÝR
+        // 2. SONRA Aï¿½LE EKRANIN SAï¿½INDAN ï¿½OCUï¿½UN YANINA GELï¿½R
         // --------------------------------------------------
 
         SetActiveSafe(
@@ -2161,7 +2163,7 @@ public class Stage6Manager : MonoBehaviour
         }
         else
         {
-            // Eski Inspector atamalarýnýn bozulmamasý için yedek kullaným.
+            // Eski Inspector atamalarï¿½nï¿½n bozulmamasï¿½ iï¿½in yedek kullanï¿½m.
             SetActiveSafe(
                 finalCongratulationsPanel,
                 true
@@ -2173,10 +2175,10 @@ public class Stage6Manager : MonoBehaviour
         finalSuccessConfirmed = false;
 
         Debug.Log(
-            "6. aþama tamamlandý. Final baþarý panelindeki buton bekleniyor."
+            "6. aï¿½ama tamamlandï¿½. Final baï¿½arï¿½ panelindeki buton bekleniyor."
         );
 
-        // Son baþarý panelindeki Tamam butonuna basýlmasýný bekler.
+        // Son baï¿½arï¿½ panelindeki Tamam butonuna basï¿½lmasï¿½nï¿½ bekler.
         yield return new WaitUntil(
             () => finalSuccessConfirmed
         );
@@ -2186,7 +2188,7 @@ public class Stage6Manager : MonoBehaviour
 
     /// <summary>
     /// sonsecimaferin panelindeki Tamam butonunun
-    /// OnClick olayýna atanmalýdýr.
+    /// OnClick olayï¿½na atanmalï¿½dï¿½r.
     /// </summary>
     public void ConfirmFinalSuccess()
     {
@@ -2233,7 +2235,7 @@ public class Stage6Manager : MonoBehaviour
         )
         {
             Debug.LogError(
-                "Stage6Manager: Map Scene Name alaný boþ."
+                "Stage6Manager: Map Scene Name alanï¿½ boï¿½."
             );
 
             isReturningToMap = false;
@@ -2248,7 +2250,7 @@ public class Stage6Manager : MonoBehaviour
         {
             Debug.LogError(
                 $"Stage6Manager: '{mapSceneName}' sahnesi " +
-                "Build Profiles içindeki Scene List'te bulunamadý."
+                "Build Profiles iï¿½indeki Scene List'te bulunamadï¿½."
             );
 
             isReturningToMap = false;
@@ -2267,8 +2269,8 @@ public class Stage6Manager : MonoBehaviour
             Color tintedColor =
                 familyWrongTint;
 
-            // Alfa tam opak kalýr. Böylece arkadaki gömülü buton görünümü
-            // yeniden ortaya çýkmaz.
+            // Alfa tam opak kalï¿½r. Bï¿½ylece arkadaki gï¿½mï¿½lï¿½ buton gï¿½rï¿½nï¿½mï¿½
+            // yeniden ortaya ï¿½ï¿½kmaz.
             tintedColor.a = 1f;
             familyChoiceImage.color =
                 tintedColor;
@@ -2314,7 +2316,7 @@ public class Stage6Manager : MonoBehaviour
     }
 
     // --------------------------------------------------
-    // ÜST PANEL METÝNLERÝ
+    // ï¿½ST PANEL METï¿½NLERï¿½
     // --------------------------------------------------
 
     private void UpdateTopPanelsForIntro()
@@ -2385,9 +2387,9 @@ public class Stage6Manager : MonoBehaviour
     private void SetStableTopPanelTexts()
     {
         SetTopPanelTexts(
-            "Vücudundaki belirtileri fark et ve gerektiðinde yardým iste.",
-            "Görev",
-            "Doðru davranýþý seç"
+            "Vï¿½cudundaki belirtileri fark et ve gerektiï¿½inde yardï¿½m iste.",
+            "Gï¿½rev",
+            "Doï¿½ru davranï¿½ï¿½ï¿½ seï¿½"
         );
     }
 
@@ -2450,7 +2452,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Göðüs aðrýsý
+        // Gï¿½ï¿½ï¿½s aï¿½rï¿½sï¿½
         SetActiveSafe(
             chestPainChild,
             false
@@ -2478,7 +2480,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Baþ dönmesi
+        // Baï¿½ dï¿½nmesi
         SetActiveSafe(
             dizzinessChild,
             false
@@ -2504,7 +2506,7 @@ public class Stage6Manager : MonoBehaviour
             false
         );
 
-        // Son seçim
+        // Son seï¿½im
         SetActiveSafe(
             finalChoicePanel,
             false

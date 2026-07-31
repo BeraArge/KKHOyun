@@ -5,16 +5,16 @@ using UnityEngine.UI;
 
 public class Stage5MedicineManager : MonoBehaviour
 {
-    [Header("Eðitim")]
-    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    [Header("Eï¿½itim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileï¿½eni.")]
     public EducationPanelUI educationPanel;
 
-    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [Tooltip("EducationPanelUI iï¿½indeki Steps listesinde kullanï¿½lacak adï¿½m kimliï¿½i.")]
     [SerializeField]
     private string educationStepId = "asama5_egitim1";
 
-    [Header("Sahne Ýçeriði")]
-    [Tooltip("Eðitim tamamlanana kadar kapalý kalacak ilaç seçimi sahnesi.")]
+    [Header("Sahne ï¿½ï¿½eriï¿½i")]
+    [Tooltip("Eï¿½itim tamamlanana kadar kapalï¿½ kalacak ilaï¿½ seï¿½imi sahnesi.")]
     public GameObject sceneContent;
 
     [Header("Popup")]
@@ -43,7 +43,7 @@ public class Stage5MedicineManager : MonoBehaviour
     public int requiredCount = 3;
     public int currentRequiredCount = 0;
 
-    [Header("Aþama Geçiþi")]
+    [Header("Aï¿½ama Geï¿½iï¿½i")]
     [SerializeField]
     private int stageNumber = 5;
 
@@ -62,6 +62,8 @@ public class Stage5MedicineManager : MonoBehaviour
 
     private void Start()
     {
+        StageProgress.EnterStage(stageNumber);
+
         HideSlot(vitaminSlotImage);
         HideSlot(heartMedicineSlotImage);
         HideSlot(syrupSlotImage);
@@ -75,7 +77,7 @@ public class Stage5MedicineManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Stage5MedicineManager: Scene Content alanýna ilaç seçimi sahnesi atanmadý."
+                "Stage5MedicineManager: Scene Content alanï¿½na ilaï¿½ seï¿½imi sahnesi atanmadï¿½."
             );
         }
 
@@ -96,7 +98,7 @@ public class Stage5MedicineManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Stage5MedicineManager: Education Panel atanmadý. Eðitim adýmý atlanýyor."
+                "Stage5MedicineManager: Education Panel atanmadï¿½. Eï¿½itim adï¿½mï¿½ atlanï¿½yor."
             );
         }
 
@@ -108,7 +110,7 @@ public class Stage5MedicineManager : MonoBehaviour
         }
 
         Debug.Log(
-            "[Stage5MedicineManager] Eðitim tamamlandý. Ýlaç seçimi baþladý."
+            "[Stage5MedicineManager] Eï¿½itim tamamlandï¿½. ï¿½laï¿½ seï¿½imi baï¿½ladï¿½."
         );
     }
 
@@ -181,8 +183,8 @@ public class Stage5MedicineManager : MonoBehaviour
                 score -= 20;
 
                 ShowWarning(
-                    "Bu ilaç sana ait deðil.\n" +
-                    "Baþkasýnýn ilacýný kullanmamalýsýn!"
+                    "Bu ilaï¿½ sana ait deï¿½il.\n" +
+                    "Baï¿½kasï¿½nï¿½n ilacï¿½nï¿½ kullanmamalï¿½sï¿½n!"
                 );
 
                 break;
@@ -190,7 +192,7 @@ public class Stage5MedicineManager : MonoBehaviour
             default:
 
                 Debug.LogWarning(
-                    "Tanýmsýz ilaç adý: " +
+                    "Tanï¿½msï¿½z ilaï¿½ adï¿½: " +
                     medicineName
                 );
 
@@ -297,18 +299,18 @@ public class Stage5MedicineManager : MonoBehaviour
             yield return warningPopup
                 .ShowAndWaitForClose(
                     "Harika!\n" +
-                    "Doðru ilaçlarý ilaç kutuna yerleþtirdin."
+                    "Doï¿½ru ilaï¿½larï¿½ ilaï¿½ kutuna yerleï¿½tirdin."
                 );
         }
         else
         {
             Debug.LogWarning(
-                "Harika! Doðru ilaçlarý ilaç kutuna yerleþtirdin."
+                "Harika! Doï¿½ru ilaï¿½larï¿½ ilaï¿½ kutuna yerleï¿½tirdin."
             );
         }
 
         Debug.Log(
-            "[Stage5MedicineManager] Aþama 5 tamamlandý. Skor: " +
+            "[Stage5MedicineManager] Aï¿½ama 5 tamamlandï¿½. Skor: " +
             score
         );
 
@@ -346,7 +348,7 @@ public class Stage5MedicineManager : MonoBehaviour
         )
         {
             Debug.LogError(
-                "[Stage5MedicineManager] Map Scene Name alaný boþ."
+                "[Stage5MedicineManager] Map Scene Name alanï¿½ boï¿½."
             );
 
             isReturningToMap = false;
@@ -361,7 +363,7 @@ public class Stage5MedicineManager : MonoBehaviour
         {
             Debug.LogError(
                 $"[Stage5MedicineManager] '{mapSceneName}' sahnesi " +
-                "Build Profiles içindeki Scene List'te bulunamadý."
+                "Build Profiles iï¿½indeki Scene List'te bulunamadï¿½."
             );
 
             isReturningToMap = false;

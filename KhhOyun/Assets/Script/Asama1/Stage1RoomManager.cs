@@ -9,16 +9,16 @@ public class Stage1RoomManager : MonoBehaviour
     [Header("UI")]
     public TMP_Text messageText;
 
-    [Header("Eðitim")]
-    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    [Header("Eï¿½itim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileï¿½eni.")]
     public EducationPanelUI educationPanelUI;
 
-    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [Tooltip("EducationPanelUI iï¿½indeki Steps listesinde kullanï¿½lacak adï¿½m kimliï¿½i.")]
     [SerializeField]
     private string educationStepId = "asama1_egitim";
 
-    [Header("Sahne Ýçeriði")]
-    [Tooltip("Eðitim tamamlanana kadar kapalý kalacak Sahne objesi.")]
+    [Header("Sahne ï¿½ï¿½eriï¿½i")]
+    [Tooltip("Eï¿½itim tamamlanana kadar kapalï¿½ kalacak Sahne objesi.")]
     public GameObject sceneContent;
 
     [Header("Popup")]
@@ -47,7 +47,7 @@ public class Stage1RoomManager : MonoBehaviour
     public int requiredCount = 2;
     public int currentRequiredCount = 0;
 
-    [Header("Aþama Geçiþi")]
+    [Header("Aï¿½ama Geï¿½iï¿½i")]
     [SerializeField] private int stageNumber = 1;
     [SerializeField] private string mapSceneName = "Map";
     [SerializeField] private float mapReturnDelay = 0.4f;
@@ -62,11 +62,13 @@ public class Stage1RoomManager : MonoBehaviour
 
     private void Start()
     {
+        StageProgress.EnterStage(stageNumber);
+
         HideSlot(pajamaSlotImage);
         HideSlot(toothbrushSlotImage);
         HideSlot(toySlotImage);
 
-        // Eðitim bitene kadar oyun sahnesi gizli kalýr.
+        // Eï¿½itim bitene kadar oyun sahnesi gizli kalï¿½r.
         if (sceneContent != null)
         {
             sceneContent.SetActive(false);
@@ -74,7 +76,7 @@ public class Stage1RoomManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Stage1RoomManager: Scene Content alanýna Sahne objesi atanmadý."
+                "Stage1RoomManager: Scene Content alanï¿½na Sahne objesi atanmadï¿½."
             );
         }
 
@@ -90,7 +92,7 @@ public class Stage1RoomManager : MonoBehaviour
         if (messageText != null)
         {
             messageText.text =
-                "Önce kýsa eðitimi dinleyelim.";
+                "ï¿½nce kï¿½sa eï¿½itimi dinleyelim.";
         }
 
         if (educationPanelUI != null)
@@ -103,15 +105,15 @@ public class Stage1RoomManager : MonoBehaviour
         else
         {
             Debug.LogError(
-                "Stage1RoomManager: Education Panel UI alanýna " +
-                "EducationPanel üzerindeki EducationPanelUI bileþeni atanmadý."
+                "Stage1RoomManager: Education Panel UI alanï¿½na " +
+                "EducationPanel ï¿½zerindeki EducationPanelUI bileï¿½eni atanmadï¿½."
             );
         }
 
         educationIsOpen = false;
 
-        // Devam butonuna basýlýp eðitim paneli kapandýktan sonra
-        // asýl oyun sahnesi görünür hâle gelir.
+        // Devam butonuna basï¿½lï¿½p eï¿½itim paneli kapandï¿½ktan sonra
+        // asï¿½l oyun sahnesi gï¿½rï¿½nï¿½r hï¿½le gelir.
         if (sceneContent != null)
         {
             sceneContent.SetActive(true);
@@ -120,11 +122,11 @@ public class Stage1RoomManager : MonoBehaviour
         if (messageText != null)
         {
             messageText.text =
-                "Merhaba! Bugün hastane için çantaný hazýrlayacaðýz.";
+                "Merhaba! Bugï¿½n hastane iï¿½in ï¿½antanï¿½ hazï¿½rlayacaï¿½ï¿½z.";
         }
 
         Debug.Log(
-            "Aþama 1 eðitimi tamamlandý. Oyun baþladý."
+            "Aï¿½ama 1 eï¿½itimi tamamlandï¿½. Oyun baï¿½ladï¿½."
         );
     }
 
@@ -151,24 +153,24 @@ public class Stage1RoomManager : MonoBehaviour
 
             case "cips":
                 score -= 10;
-                ShowWarning("Þimdilik abur cubur almamalýsýn.");
+                ShowWarning("ï¿½imdilik abur cubur almamalï¿½sï¿½n.");
                 break;
 
             case "soda":
                 score -= 10;
-                ShowWarning("Gazlý içecekler ameliyat öncesinde uygun deðildir.");
+                ShowWarning("Gazlï¿½ iï¿½ecekler ameliyat ï¿½ncesinde uygun deï¿½ildir.");
                 break;
 
             case "oyuncaklar":
                 score -= 5;
-                ShowWarning("Gereksiz oyuncaklarý yanýna almana gerek yok.");
+                ShowWarning("Gereksiz oyuncaklarï¿½ yanï¿½na almana gerek yok.");
                 break;
 
             case "yemek":
                 score -= 10;
 
                 ShowWarning(
-                    "Ameliyat öncesinde yemek yasak olabilir. " +
+                    "Ameliyat ï¿½ncesinde yemek yasak olabilir. " +
                     "Doktorunu dinlemelisin."
                 );
                 break;
@@ -177,7 +179,7 @@ public class Stage1RoomManager : MonoBehaviour
                 score -= 10;
 
                 ShowWarning(
-                    "Ameliyat öncesinde su içmek yasak olabilir. " +
+                    "Ameliyat ï¿½ncesinde su iï¿½mek yasak olabilir. " +
                     "Doktorunu dinlemelisin."
                 );
                 break;
@@ -322,7 +324,7 @@ public class Stage1RoomManager : MonoBehaviour
             if (warningPopup != null)
             {
                 yield return warningPopup.ShowAndWaitForClose(
-                    "Oyuncaðýný yanýna alabilirsin.\n" +
+                    "Oyuncaï¿½ï¿½nï¿½ yanï¿½na alabilirsin.\n" +
                     "Ama o ameliyata giremez,\n" +
                     "odanda seni bekleyecek."
                 );
@@ -332,7 +334,7 @@ public class Stage1RoomManager : MonoBehaviour
         if (warningPopup != null)
         {
             yield return warningPopup.ShowAndWaitForClose(
-                "Harikasýn!\nÇantan hazýr."
+                "Harikasï¿½n!\nï¿½antan hazï¿½r."
             );
         }
 
@@ -358,7 +360,7 @@ public class Stage1RoomManager : MonoBehaviour
 
         if (string.IsNullOrWhiteSpace(mapSceneName))
         {
-            Debug.LogError("Map Scene Name alaný boþ.");
+            Debug.LogError("Map Scene Name alanï¿½ boï¿½.");
             yield break;
         }
 

@@ -69,6 +69,8 @@ public class Asama3StageManager : MonoBehaviour
 
     private void Start()
     {
+        StageProgress.EnterStage(stageNumber);
+
         if (phaseAContainer != null)
         {
             phaseAContainer.SetActive(false);

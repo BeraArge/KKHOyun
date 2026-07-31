@@ -6,24 +6,24 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("Eðitim")]
-    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    [Header("Eï¿½itim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileï¿½eni.")]
     public EducationPanelUI educationPanel;
 
-    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [Tooltip("EducationPanelUI iï¿½indeki Steps listesinde kullanï¿½lacak adï¿½m kimliï¿½i.")]
     [SerializeField]
     private string educationStepId = "asama7_egitim1";
 
-    [Header("Eðitim Týklama Engelleyici")]
-    [Tooltip("Eðitim sýrasýnda Task1 içindeki meyvelerin önünde duracak görünmez blocker objesi.")]
+    [Header("Eï¿½itim Tï¿½klama Engelleyici")]
+    [Tooltip("Eï¿½itim sï¿½rasï¿½nda Task1 iï¿½indeki meyvelerin ï¿½nï¿½nde duracak gï¿½rï¿½nmez blocker objesi.")]
     [SerializeField]
     private GameObject educationInputBlocker;
 
-    [Header("Görev Ayarlarý")]
+    [Header("Gï¿½rev Ayarlarï¿½")]
     [SerializeField]
     private int totalTasks = 5;
 
-    [Header("Aþama Geçiþi")]
+    [Header("Aï¿½ama Geï¿½iï¿½i")]
     [SerializeField]
     private int stageNumber = 7;
 
@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
     private bool gameCompleted;
     private bool isReturningToMap;
 
-    // Ayný görevin birden fazla kez sayýlmasýný engeller.
+    // Aynï¿½ gï¿½revin birden fazla kez sayï¿½lmasï¿½nï¿½ engeller.
     private readonly HashSet<int> completedTaskIds =
         new HashSet<int>();
 
@@ -58,6 +58,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        StageProgress.EnterStage(stageNumber);
+
         completedTasks = 0;
         educationIsOpen = true;
         gameStarted = false;
@@ -66,7 +68,7 @@ public class GameManager : MonoBehaviour
 
         completedTaskIds.Clear();
 
-        // Eðitim açýkken blocker aktif olur.
+        // Eï¿½itim aï¿½ï¿½kken blocker aktif olur.
         SetEducationBlockerActive(true);
 
         StartCoroutine(
@@ -86,19 +88,19 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "[GameManager] Education Panel atanmadý. " +
-                "Aþama 7 eðitimi atlanýyor."
+                "[GameManager] Education Panel atanmadï¿½. " +
+                "Aï¿½ama 7 eï¿½itimi atlanï¿½yor."
             );
         }
 
         educationIsOpen = false;
         gameStarted = true;
 
-        // Eðitim kapandýktan sonra blocker kapanýr.
+        // Eï¿½itim kapandï¿½ktan sonra blocker kapanï¿½r.
         SetEducationBlockerActive(false);
 
         Debug.Log(
-            "[GameManager] Aþama 7 eðitimi tamamlandý. Oyun baþladý."
+            "[GameManager] Aï¿½ama 7 eï¿½itimi tamamlandï¿½. Oyun baï¿½ladï¿½."
         );
     }
 
@@ -106,7 +108,7 @@ public class GameManager : MonoBehaviour
         int taskId
     )
     {
-        // Eðitim kapanmadan hiçbir görev tamamlanmýþ sayýlmaz.
+        // Eï¿½itim kapanmadan hiï¿½bir gï¿½rev tamamlanmï¿½ï¿½ sayï¿½lmaz.
         if (
             educationIsOpen ||
             !gameStarted ||
@@ -120,7 +122,7 @@ public class GameManager : MonoBehaviour
         if (completedTaskIds.Contains(taskId))
         {
             Debug.Log(
-                $"Görev {taskId} daha önce tamamlandý."
+                $"Gï¿½rev {taskId} daha ï¿½nce tamamlandï¿½."
             );
 
             return;
@@ -130,8 +132,8 @@ public class GameManager : MonoBehaviour
         completedTasks++;
 
         Debug.Log(
-            $"Harika! Görev {taskId} bitti. " +
-            $"Ýlerleme durumu: {completedTasks}/{totalTasks}."
+            $"Harika! Gï¿½rev {taskId} bitti. " +
+            $"ï¿½lerleme durumu: {completedTasks}/{totalTasks}."
         );
 
         if (completedTasks >= totalTasks)
@@ -154,7 +156,7 @@ public class GameManager : MonoBehaviour
         gameCompleted = true;
 
         Debug.Log(
-            "Tebrikler, tüm görevleri tamamladýn!"
+            "Tebrikler, tï¿½m gï¿½revleri tamamladï¿½n!"
         );
 
         GameEvents.OnGameWon?.Invoke();
@@ -188,7 +190,7 @@ public class GameManager : MonoBehaviour
         )
         {
             Debug.LogError(
-                "[GameManager] Map Scene Name alaný boþ."
+                "[GameManager] Map Scene Name alanï¿½ boï¿½."
             );
 
             isReturningToMap = false;
@@ -203,7 +205,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError(
                 $"[GameManager] '{mapSceneName}' sahnesi " +
-                "Build Profiles içindeki Scene List'te bulunamadý."
+                "Build Profiles iï¿½indeki Scene List'te bulunamadï¿½."
             );
 
             isReturningToMap = false;
@@ -226,7 +228,7 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "[GameManager] Education Input Blocker atanmadý."
+                "[GameManager] Education Input Blocker atanmadï¿½."
             );
         }
     }
@@ -244,7 +246,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Yalnýzca test/debug amacýyla kullanýlabilir.
+        // Yalnï¿½zca test/debug amacï¿½yla kullanï¿½labilir.
         if (
             Keyboard.current.digit1Key
                 .wasPressedThisFrame

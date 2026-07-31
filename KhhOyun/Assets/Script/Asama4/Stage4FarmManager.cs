@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 public class Stage4FarmManager : MonoBehaviour
 {
-    [Header("Eðitim")]
-    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileþeni.")]
+    [Header("Eï¿½itim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileï¿½eni.")]
     public EducationPanelUI educationPanel;
 
-    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanýlacak adým kimliði.")]
+    [Tooltip("EducationPanelUI iï¿½indeki Steps listesinde kullanï¿½lacak adï¿½m kimliï¿½i.")]
     [SerializeField]
     private string educationStepId = "asama4_egitim1";
 
@@ -19,11 +19,11 @@ public class Stage4FarmManager : MonoBehaviour
     [Header("Fly Animation")]
     public ItemFlyAnimator flyAnimator;
 
-    [Header("Bölüm Geçiþi")]
-    [Tooltip("Saðlýklý besinlerin toplandýðý Farm bölümünün ana objesi.")]
+    [Header("Bï¿½lï¿½m Geï¿½iï¿½i")]
+    [Tooltip("Saï¿½lï¿½klï¿½ besinlerin toplandï¿½ï¿½ï¿½ Farm bï¿½lï¿½mï¿½nï¿½n ana objesi.")]
     public GameObject farmContainer;
 
-    [Tooltip("Farm bölümü tamamlandýktan sonra açýlacak Dengeli Tabak bölümü.")]
+    [Tooltip("Farm bï¿½lï¿½mï¿½ tamamlandï¿½ktan sonra aï¿½ï¿½lacak Dengeli Tabak bï¿½lï¿½mï¿½.")]
     public GameObject plateContainer;
 
     [Header("Collected Food Slots")]
@@ -35,6 +35,11 @@ public class Stage4FarmManager : MonoBehaviour
     public int requiredHealthyFoodCount = 7;
     public int collectedHealthyFoodCount = 0;
 
+    [Header("Aï¿½ama Geï¿½iï¿½i")]
+    [Tooltip("Bu deï¿½er, Aï¿½ama 4'ï¿½n Plate bï¿½lï¿½mï¿½ndeki stageNumber ile aynï¿½ olmalï¿½dï¿½r.")]
+    [SerializeField]
+    private int stageNumber = 4;
+
     private bool stageCompleted;
     private bool transitionInProgress;
     private bool educationIsOpen;
@@ -44,11 +49,13 @@ public class Stage4FarmManager : MonoBehaviour
 
     private void Start()
     {
+        StageProgress.EnterStage(stageNumber);
+
         stageCompleted = false;
         transitionInProgress = false;
         educationIsOpen = true;
 
-        // Eðitim bitene kadar iki oyun bölümü de kapalý kalýr.
+        // Eï¿½itim bitene kadar iki oyun bï¿½lï¿½mï¿½ de kapalï¿½ kalï¿½r.
         if (farmContainer != null)
         {
             farmContainer.SetActive(false);
@@ -87,14 +94,14 @@ public class Stage4FarmManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Stage4FarmManager: Education Panel atanmadý. " +
-                "Eðitim adýmý atlanýyor."
+                "Stage4FarmManager: Education Panel atanmadï¿½. " +
+                "Eï¿½itim adï¿½mï¿½ atlanï¿½yor."
             );
         }
 
         educationIsOpen = false;
 
-        // Eðitim kapandýktan sonra Farm bölümü açýlýr.
+        // Eï¿½itim kapandï¿½ktan sonra Farm bï¿½lï¿½mï¿½ aï¿½ï¿½lï¿½r.
         if (farmContainer != null)
         {
             farmContainer.SetActive(true);
@@ -102,18 +109,18 @@ public class Stage4FarmManager : MonoBehaviour
         else
         {
             Debug.LogError(
-                "Stage4FarmManager: Farm Container atanmadý."
+                "Stage4FarmManager: Farm Container atanmadï¿½."
             );
         }
 
-        // Dengeli Tabak, Farm tamamlanana kadar kapalý kalýr.
+        // Dengeli Tabak, Farm tamamlanana kadar kapalï¿½ kalï¿½r.
         if (plateContainer != null)
         {
             plateContainer.SetActive(false);
         }
 
         Debug.Log(
-            "[Stage4FarmManager] Eðitim tamamlandý. Farm bölümü baþladý."
+            "[Stage4FarmManager] Eï¿½itim tamamlandï¿½. Farm bï¿½lï¿½mï¿½ baï¿½ladï¿½."
         );
     }
 
@@ -154,8 +161,8 @@ public class Stage4FarmManager : MonoBehaviour
                 score -= 10;
 
                 ShowWarning(
-                    "Hamburgeri sýk tüketmemeliyiz.\n" +
-                    "Kalbine daha faydalý besinleri seçelim."
+                    "Hamburgeri sï¿½k tï¿½ketmemeliyiz.\n" +
+                    "Kalbine daha faydalï¿½ besinleri seï¿½elim."
                 );
 
                 break;
@@ -165,7 +172,7 @@ public class Stage4FarmManager : MonoBehaviour
                 score -= 10;
 
                 ShowWarning(
-                    "Cips yerine daha saðlýklý atýþtýrmalýklar seçebilirsin."
+                    "Cips yerine daha saï¿½lï¿½klï¿½ atï¿½ï¿½tï¿½rmalï¿½klar seï¿½ebilirsin."
                 );
 
                 break;
@@ -176,7 +183,7 @@ public class Stage4FarmManager : MonoBehaviour
                 score -= 10;
 
                 ShowWarning(
-                    "Gazlý içecekler saðlýklý bir seçim deðildir."
+                    "Gazlï¿½ iï¿½ecekler saï¿½lï¿½klï¿½ bir seï¿½im deï¿½ildir."
                 );
 
                 break;
@@ -186,7 +193,7 @@ public class Stage4FarmManager : MonoBehaviour
                 score -= 15;
 
                 ShowWarning(
-                    "Aþýrý tuz kalbini yorabilir."
+                    "Aï¿½ï¿½rï¿½ tuz kalbini yorabilir."
                 );
 
                 break;
@@ -194,7 +201,7 @@ public class Stage4FarmManager : MonoBehaviour
             default:
 
                 Debug.LogWarning(
-                    "Tanýmsýz besin adý: " +
+                    "Tanï¿½msï¿½z besin adï¿½: " +
                     foodName
                 );
 
@@ -218,7 +225,7 @@ public class Stage4FarmManager : MonoBehaviour
         {
             Debug.LogError(
                 foodName +
-                " için Fly Image atanmadý."
+                " iï¿½in Fly Image atanmadï¿½."
             );
 
             return;
@@ -241,7 +248,7 @@ public class Stage4FarmManager : MonoBehaviour
         )
         {
             Debug.LogWarning(
-                "Toplanan besin için yeterli slot veya hedef bulunamadý."
+                "Toplanan besin iï¿½in yeterli slot veya hedef bulunamadï¿½."
             );
 
             return;
@@ -327,16 +334,16 @@ public class Stage4FarmManager : MonoBehaviour
         {
             yield return warningPopup
                 .ShowAndWaitForClose(
-                    "Harikasýn!\n" +
-                    "Saðlýklý besinleri topladýn.\n" +
-                    "Þimdi dengeli tabak hazýrlayabiliriz!"
+                    "Harikasï¿½n!\n" +
+                    "Saï¿½lï¿½klï¿½ besinleri topladï¿½n.\n" +
+                    "ï¿½imdi dengeli tabak hazï¿½rlayabiliriz!"
                 );
         }
         else
         {
             Debug.LogWarning(
-                "Harikasýn! Saðlýklý besinleri topladýn. " +
-                "Þimdi dengeli tabak hazýrlayabiliriz!"
+                "Harikasï¿½n! Saï¿½lï¿½klï¿½ besinleri topladï¿½n. " +
+                "ï¿½imdi dengeli tabak hazï¿½rlayabiliriz!"
             );
         }
 
@@ -349,7 +356,7 @@ public class Stage4FarmManager : MonoBehaviour
         else
         {
             Debug.LogError(
-                "Stage4FarmManager: Plate Container atanmadý."
+                "Stage4FarmManager: Plate Container atanmadï¿½."
             );
         }
 
@@ -359,8 +366,8 @@ public class Stage4FarmManager : MonoBehaviour
         }
 
         Debug.Log(
-            "[Stage4FarmManager] Farm bölümü tamamlandý. " +
-            "Dengeli Tabak bölümüne geçildi."
+            "[Stage4FarmManager] Farm bï¿½lï¿½mï¿½ tamamlandï¿½. " +
+            "Dengeli Tabak bï¿½lï¿½mï¿½ne geï¿½ildi."
         );
     }
 
