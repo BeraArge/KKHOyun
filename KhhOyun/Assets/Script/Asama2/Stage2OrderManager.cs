@@ -391,11 +391,35 @@ public class Stage2OrderManager : MonoBehaviour
         isReturningToMap = true;
 
         StageProgress.CompleteStage(
-            stageNumber
-        );
+            stageNumber,
+            success =>
+            {
+                if (!success)
+                {
+                    isReturningToMap = false;
+                    stageComplete = false;
 
-        StartCoroutine(
-            ReturnToMapRoutine()
+                    if (warningPopup != null)
+                    {
+                        warningPopup.Show(
+                            "Aşama ilerlemesi kaydedilemedi.\n" +
+                            "Lütfen internet bağlantını kontrol edip tekrar dene."
+                        );
+                    }
+                    else
+                    {
+                        Debug.LogError(
+                            "[S2OM] Aşama 2 ilerlemesi sunucuya kaydedilemedi."
+                        );
+                    }
+
+                    return;
+                }
+
+                StartCoroutine(
+                    ReturnToMapRoutine()
+                );
+            }
         );
     }
 

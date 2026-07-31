@@ -6,24 +6,27 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("E�itim")]
-    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bile�eni.")]
+    [Header("Eğitim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileşeni.")]
     public EducationPanelUI educationPanel;
 
-    [Tooltip("EducationPanelUI i�indeki Steps listesinde kullan�lacak ad�m kimli�i.")]
+    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanılacak adım kimliği.")]
     [SerializeField]
     private string educationStepId = "asama7_egitim1";
 
-    [Header("E�itim T�klama Engelleyici")]
-    [Tooltip("E�itim s�ras�nda Task1 i�indeki meyvelerin �n�nde duracak g�r�nmez blocker objesi.")]
+    [Header("Eğitim Tıklama Engelleyici")]
+    [Tooltip(
+        "Eğitim sırasında Task1 içindeki meyvelerin önünde " +
+        "duracak görünmez blocker objesi."
+    )]
     [SerializeField]
     private GameObject educationInputBlocker;
 
-    [Header("G�rev Ayarlar�")]
+    [Header("Görev Ayarları")]
     [SerializeField]
     private int totalTasks = 5;
 
-    [Header("A�ama Ge�i�i")]
+    [Header("Aşama Geçişi")]
     [SerializeField]
     private int stageNumber = 7;
 
@@ -40,7 +43,7 @@ public class GameManager : MonoBehaviour
     private bool gameCompleted;
     private bool isReturningToMap;
 
-    // Ayn� g�revin birden fazla kez say�lmas�n� engeller.
+    // Aynı görevin birden fazla kez sayılmasını engeller.
     private readonly HashSet<int> completedTaskIds =
         new HashSet<int>();
 
@@ -68,7 +71,7 @@ public class GameManager : MonoBehaviour
 
         completedTaskIds.Clear();
 
-        // E�itim a��kken blocker aktif olur.
+        // Eğitim açıkken blocker aktif olur.
         SetEducationBlockerActive(true);
 
         StartCoroutine(
@@ -88,19 +91,19 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "[GameManager] Education Panel atanmad�. " +
-                "A�ama 7 e�itimi atlan�yor."
+                "[GameManager] Education Panel atanmadı. " +
+                "Aşama 7 eğitimi atlanıyor."
             );
         }
 
         educationIsOpen = false;
         gameStarted = true;
 
-        // E�itim kapand�ktan sonra blocker kapan�r.
+        // Eğitim kapandıktan sonra blocker kapanır.
         SetEducationBlockerActive(false);
 
         Debug.Log(
-            "[GameManager] A�ama 7 e�itimi tamamland�. Oyun ba�lad�."
+            "[GameManager] Aşama 7 eğitimi tamamlandı. Oyun başladı."
         );
     }
 
@@ -108,7 +111,7 @@ public class GameManager : MonoBehaviour
         int taskId
     )
     {
-        // E�itim kapanmadan hi�bir g�rev tamamlanm�� say�lmaz.
+        // Eğitim kapanmadan hiçbir görev tamamlanmış sayılmaz.
         if (
             educationIsOpen ||
             !gameStarted ||
@@ -122,7 +125,7 @@ public class GameManager : MonoBehaviour
         if (completedTaskIds.Contains(taskId))
         {
             Debug.Log(
-                $"G�rev {taskId} daha �nce tamamland�."
+                $"Görev {taskId} daha önce tamamlandı."
             );
 
             return;
@@ -132,8 +135,8 @@ public class GameManager : MonoBehaviour
         completedTasks++;
 
         Debug.Log(
-            $"Harika! G�rev {taskId} bitti. " +
-            $"�lerleme durumu: {completedTasks}/{totalTasks}."
+            $"Harika! Görev {taskId} bitti. " +
+            $"İlerleme durumu: {completedTasks}/{totalTasks}."
         );
 
         if (completedTasks >= totalTasks)
@@ -156,29 +159,49 @@ public class GameManager : MonoBehaviour
         gameCompleted = true;
 
         Debug.Log(
-            "Tebrikler, t�m g�revleri tamamlad�n!"
+            "Tebrikler, tüm görevleri tamamladın!"
         );
 
         GameEvents.OnGameWon?.Invoke();
 
-        StartCoroutine(
-            CompleteStageAndReturnToMap()
-        );
+        CompleteStageAndReturnToMap();
     }
 
-    private IEnumerator CompleteStageAndReturnToMap()
+    private void CompleteStageAndReturnToMap()
     {
         if (isReturningToMap)
         {
-            yield break;
+            return;
         }
 
         isReturningToMap = true;
 
         StageProgress.CompleteStage(
-            stageNumber
-        );
+            stageNumber,
+            success =>
+            {
+                if (!success)
+                {
+                    isReturningToMap = false;
+                    gameCompleted = false;
 
+                    Debug.LogError(
+                        "[GameManager] Aşama 7 ilerlemesi " +
+                        "sunucuya kaydedilemedi."
+                    );
+
+                    return;
+                }
+
+                StartCoroutine(
+                    ReturnToMapRoutine()
+                );
+            }
+        );
+    }
+
+    private IEnumerator ReturnToMapRoutine()
+    {
         yield return new WaitForSecondsRealtime(
             mapReturnDelay
         );
@@ -190,7 +213,7 @@ public class GameManager : MonoBehaviour
         )
         {
             Debug.LogError(
-                "[GameManager] Map Scene Name alan� bo�."
+                "[GameManager] Map Scene Name alanı boş."
             );
 
             isReturningToMap = false;
@@ -205,7 +228,7 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError(
                 $"[GameManager] '{mapSceneName}' sahnesi " +
-                "Build Profiles i�indeki Scene List'te bulunamad�."
+                "Build Profiles içindeki Scene List'te bulunamadı."
             );
 
             isReturningToMap = false;
@@ -228,7 +251,7 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "[GameManager] Education Input Blocker atanmad�."
+                "[GameManager] Education Input Blocker atanmadı."
             );
         }
     }
@@ -246,7 +269,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Yaln�zca test/debug amac�yla kullan�labilir.
+        // Yalnızca test/debug amacıyla kullanılabilir.
         if (
             Keyboard.current.digit1Key
                 .wasPressedThisFrame

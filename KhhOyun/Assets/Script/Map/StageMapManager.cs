@@ -6,18 +6,25 @@ using UnityEngine.SceneManagement;
 public class StageMapManager : MonoBehaviour
 {
     [Header("Loading Sahnesi")]
-    [SerializeField] private string loadingSceneName = "LoadingScene";
+    [SerializeField]
+    private string loadingSceneName = "LoadingScene";
 
-    [Header("Panel Yaz�lar�")]
-    [SerializeField] private TMP_Text messageText;
-    [SerializeField] private TMP_Text taskSubTitleText;
+    [Header("Panel Yazıları")]
+    [SerializeField]
+    private TMP_Text messageText;
 
-    [Header("Uyar� Penceresi")]
-    [SerializeField] private WarningPopupUI warningPopup;
+    [SerializeField]
+    private TMP_Text taskSubTitleText;
+
+    [Header("Uyarı Penceresi")]
+    [SerializeField]
+    private WarningPopupUI warningPopup;
 
     private StageMapItem[] stageItems;
     private int currentStage;
+
     private bool isLoadingScene;
+    private bool progressLoaded;
 
     private void Start()
     {
@@ -25,62 +32,125 @@ public class StageMapManager : MonoBehaviour
             .OrderBy(x => x.StageNumber)
             .ToArray();
 
-        if (messageText != null)
-        {
-            messageText.text = "Yükleniyor...";
-        }
+        progressLoaded = false;
+        isLoadingScene = false;
+
+        // Sunucu cevabı gelene kadar bütün aşamalar
+        // kilitli ve pasif görünür.
+        ShowLoadingState();
 
         StageProgress.Initialize(
             onReady: () =>
             {
-                currentStage = StageProgress.CurrentStage;
+                currentStage =
+                    StageProgress.CurrentStage;
+
+                progressLoaded = true;
+
                 RefreshStages();
             },
             onError: message =>
             {
-                // Sunucuya ulaşılamazsa güvenli varsayılan: yalnızca 1. aşama açık.
-                currentStage = StageProgress.CurrentStage;
+                /*
+                 * Sunucuya ulaşılamazsa StageProgress içindeki
+                 * mevcut güvenli değer kullanılır.
+                 */
+                currentStage =
+                    StageProgress.CurrentStage;
+
+                progressLoaded = true;
+
                 RefreshStages();
                 ShowMessage(message);
             }
         );
     }
 
+    private void ShowLoadingState()
+    {
+        if (messageText != null)
+        {
+            messageText.text =
+                "İlerleme bilgilerin yükleniyor...";
+        }
+
+        if (taskSubTitleText != null)
+        {
+            taskSubTitleText.text =
+                "Lütfen bekle";
+        }
+
+        if (stageItems == null)
+        {
+            return;
+        }
+
+        foreach (StageMapItem stage in stageItems)
+        {
+            if (stage == null)
+            {
+                continue;
+            }
+
+            stage.SetVisualState(
+                isLocked: true,
+                isCurrent: false,
+                isCompleted: false
+            );
+        }
+    }
+
     public void StageClicked(int clickedStage)
     {
-        // Pe� pe�e t�klamalar� engeller.
+        // Sunucu bilgisi gelmeden aşamalara giriş yapılmaz.
+        if (!progressLoaded)
+        {
+            ShowMessage(
+                "İlerleme bilgilerin henüz yükleniyor.\n" +
+                "Lütfen kısa bir süre bekle."
+            );
+
+            return;
+        }
+
+        // Peş peşe tıklamaları engeller.
         if (isLoadingScene)
         {
             return;
         }
 
-        StageMapItem clickedItem = stageItems
-            .FirstOrDefault(
+        StageMapItem clickedItem =
+            stageItems.FirstOrDefault(
                 x => x.StageNumber == clickedStage
             );
 
         if (clickedItem == null)
         {
             Debug.LogError(
-                $"{clickedStage}. a�ama i�in " +
-                "StageMapItem bulunamad�."
+                $"{clickedStage}. aşama için " +
+                "StageMapItem bulunamadı."
             );
 
             return;
         }
 
-        // Hen�z a��lmam�� a�ama.
+        // Henüz açılmamış aşama.
         if (clickedStage > currentStage)
         {
-            ShowLockedStageWarning(clickedStage);
+            ShowLockedStageWarning(
+                clickedStage
+            );
+
             return;
         }
 
         /*
-         * Aktif veya daha �nce tamamlanm�� a�ama
-         * tekrar a��labilir.
+         * Aktif veya daha önce tamamlanmış aşama
+         * tekrar açılabilir.
          */
-        LoadStageWithLoadingScreen(clickedItem);
+        LoadStageWithLoadingScreen(
+            clickedItem
+        );
     }
 
     private void LoadStageWithLoadingScreen(
@@ -92,51 +162,68 @@ public class StageMapManager : MonoBehaviour
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(stage.SceneName))
+        if (
+            string.IsNullOrWhiteSpace(
+                stage.SceneName
+            )
+        )
         {
             ShowMessage(
-                "Bu a�aman�n oyun sahnesi hen�z haz�rlanmad�."
+                "Bu aşamanın oyun sahnesi henüz hazırlanmadı."
             );
 
             return;
         }
 
-        if (!Application.CanStreamedLevelBeLoaded(stage.SceneName))
+        if (
+            !Application.CanStreamedLevelBeLoaded(
+                stage.SceneName
+            )
+        )
         {
             ShowMessage(
-                "Bu a�aman�n sahnesi hen�z kullan�ma haz�r de�il."
+                "Bu aşamanın sahnesi henüz kullanıma hazır değil."
             );
 
             Debug.LogError(
                 $"'{stage.SceneName}' sahnesi Build Profiles " +
-                "i�indeki Scene List'te bulunamad�."
+                "içindeki Scene List'te bulunamadı."
             );
 
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(loadingSceneName))
+        if (
+            string.IsNullOrWhiteSpace(
+                loadingSceneName
+            )
+        )
         {
             ShowMessage(
-                "Loading sahnesinin ad� ayarlanmam��."
+                "Loading sahnesinin adı ayarlanmamış."
             );
 
             Debug.LogError(
-                "StageMapManager �zerindeki Loading Scene Name alan� bo�."
+                "StageMapManager üzerindeki " +
+                "Loading Scene Name alanı boş."
             );
 
             return;
         }
 
-        if (!Application.CanStreamedLevelBeLoaded(loadingSceneName))
+        if (
+            !Application.CanStreamedLevelBeLoaded(
+                loadingSceneName
+            )
+        )
         {
             ShowMessage(
-                "Y�kleme ekran� hen�z kullan�ma haz�r de�il."
+                "Yükleme ekranı henüz kullanıma hazır değil."
             );
 
             Debug.LogError(
                 $"'{loadingSceneName}' sahnesi Build Profiles " +
-                "i�indeki Scene List'te bulunamad�."
+                "içindeki Scene List'te bulunamadı."
             );
 
             return;
@@ -144,17 +231,13 @@ public class StageMapManager : MonoBehaviour
 
         isLoadingScene = true;
 
-        /*
-         * LoadingScene a��lmadan �nce, daha sonra
-         * a��lacak ger�ek a�aman�n ad�n� kaydediyoruz.
-         */
         LoadingSceneData.SetTargetScene(
             stage.SceneName
         );
 
         Debug.Log(
-            $"LoadingScene a��l�yor. " +
-            $"Hedef a�ama: {stage.SceneName}"
+            $"LoadingScene açılıyor. " +
+            $"Hedef aşama: {stage.SceneName}"
         );
 
         SceneManager.LoadScene(
@@ -171,28 +254,36 @@ public class StageMapManager : MonoBehaviour
         if (clickedStage == currentStage + 1)
         {
             warningMessage =
-                "Bu a�ama hen�z haz�r de�il.\n" +
-                $"�nce {currentStage}. a�amay� tamamlayal�m.";
+                "Bu aşama henüz hazır değil.\n" +
+                $"Önce {currentStage}. aşamayı tamamlayalım.";
         }
         else
         {
             warningMessage =
-                "Bu a�ama hen�z haz�r de�il.\n" +
-                "A�amalar� s�rayla tamamlayal�m.";
+                "Bu aşama henüz hazır değil.\n" +
+                "Aşamaları sırayla tamamlayalım.";
         }
 
-        ShowMessage(warningMessage);
+        ShowMessage(
+            warningMessage
+        );
     }
 
-    private void ShowMessage(string message)
+    private void ShowMessage(
+        string message
+    )
     {
         if (warningPopup != null)
         {
-            warningPopup.Show(message);
+            warningPopup.Show(
+                message
+            );
         }
         else
         {
-            Debug.LogWarning(message);
+            Debug.LogWarning(
+                message
+            );
         }
     }
 
@@ -209,6 +300,11 @@ public class StageMapManager : MonoBehaviour
 
         foreach (StageMapItem stage in stageItems)
         {
+            if (stage == null)
+            {
+                continue;
+            }
+
             bool isCompleted;
             bool isCurrent;
             bool isLocked;
@@ -252,14 +348,14 @@ public class StageMapManager : MonoBehaviour
             if (messageText != null)
             {
                 messageText.text =
-                    "Harika! T�m a�amalar� tamamlad�n. " +
-                    "�yile�me yolculu�unu ba�ar�yla bitirdin.";
+                    "Harika! Tüm aşamaları tamamladın. " +
+                    "İyileşme yolculuğunu başarıyla bitirdin.";
             }
 
             if (taskSubTitleText != null)
             {
                 taskSubTitleText.text =
-                    "T�m a�amalar tamamland�!";
+                    "Tüm aşamalar tamamlandı!";
             }
 
             return;
@@ -268,13 +364,15 @@ public class StageMapManager : MonoBehaviour
         if (messageText != null)
         {
             messageText.text =
-                GetInformationMessage(currentStage);
+                GetInformationMessage(
+                    currentStage
+                );
         }
 
         if (taskSubTitleText != null)
         {
             taskSubTitleText.text =
-                $"{currentStage}. a�amay� tamamla.";
+                $"{currentStage}. aşamayı tamamla.";
         }
     }
 
@@ -286,57 +384,58 @@ public class StageMapManager : MonoBehaviour
         {
             case 1:
                 return
-                    "�lk a�amam�z haz�r! " +
-                    "Ameliyat �ncesi Haz�rl�k b�l�m�ne " +
-                    "dokunarak ba�layal�m.";
+                    "İlk aşamamız hazır! " +
+                    "Ameliyat Öncesi Hazırlık bölümüne " +
+                    "dokunarak başlayalım.";
 
             case 2:
                 return
                     "Harika gidiyorsun! " +
-                    "�imdi Ameliyat G�n� a�amas�na ge�ebilirsin.";
+                    "Şimdi Ameliyat Günü aşamasına geçebilirsin.";
 
             case 3:
                 return
-                    "�ok g�zel! �imdi ameliyat sonras� " +
-                    "fiziksel aktiviteleri ��renelim.";
+                    "Çok güzel! Şimdi ameliyat sonrası " +
+                    "fiziksel aktiviteleri öğrenelim.";
 
             case 4:
                 return
-                    "�imdi kalbimizi koruyan sa�l�kl� " +
-                    "besinleri ke�fedelim.";
+                    "Şimdi kalbimizi koruyan sağlıklı " +
+                    "besinleri keşfedelim.";
 
             case 5:
                 return
-                    "�la�lar� do�ru zamanda ve do�ru �ekilde " +
-                    "kullanmay� ��renelim.";
+                    "İlaçları doğru zamanda ve doğru şekilde " +
+                    "kullanmayı öğrenelim.";
 
             case 6:
                 return
-                    "Acil bir durumda ne yapman gerekti�ini " +
-                    "birlikte ��renelim.";
+                    "Acil bir durumda ne yapman gerektiğini " +
+                    "birlikte öğrenelim.";
 
             case 7:
                 return
-                    "Son a�amaday�z! Sa�l���n� kendi ba��na " +
-                    "y�netmenin �nemini ��renelim.";
+                    "Son aşamadayız! Sağlığını kendi başına " +
+                    "yönetmenin önemini öğrenelim.";
 
             default:
                 return "";
         }
     }
 
-    [ContextMenu("Haritay� Yenile")]
+    [ContextMenu("Haritayı Yenile")]
     public void RefreshMap()
     {
         currentStage =
             StageProgress.CurrentStage;
 
         isLoadingScene = false;
+        progressLoaded = true;
 
         RefreshStages();
     }
 
-    [ContextMenu("�lerlemeyi S�f�rla")]
+    [ContextMenu("İlerlemeyi Sıfırla")]
     public void ResetSavedProgress()
     {
         StageProgress.ResetProgress();
@@ -345,6 +444,7 @@ public class StageMapManager : MonoBehaviour
             StageProgress.CurrentStage;
 
         isLoadingScene = false;
+        progressLoaded = true;
 
         RefreshStages();
     }

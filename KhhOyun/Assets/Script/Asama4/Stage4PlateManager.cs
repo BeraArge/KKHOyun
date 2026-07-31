@@ -110,11 +110,26 @@ public class Stage4PlateManager : MonoBehaviour
         isReturningToMap = true;
 
         StageProgress.CompleteStage(
-            stageNumber
-        );
+            stageNumber,
+            success =>
+            {
+                if (!success)
+                {
+                    isReturningToMap = false;
+                    stageCompleted = false;
 
-        StartCoroutine(
-            ReturnToMapRoutine()
+                    ShowWarning(
+                        "Aþama ilerlemesi kaydedilemedi.\n" +
+                        "Lütfen internet baðlantýný kontrol edip tekrar dene."
+                    );
+
+                    return;
+                }
+
+                StartCoroutine(
+                    ReturnToMapRoutine()
+                );
+            }
         );
     }
 

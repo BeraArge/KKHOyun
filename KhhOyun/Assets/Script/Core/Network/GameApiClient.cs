@@ -6,26 +6,23 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 /// <summary>
-/// Sunucudaki UserGameProgress / UserStageProgress API'lerine erişen düşük seviye ağ katmanı.
-/// Sahneye elle eklenmez; ilk sahne yüklenmeden önce kendi kendini oluşturup
-/// DontDestroyOnLoad ile kalıcı hâle gelir (bkz. CloudTransitionController deseni).
+/// UserGameProgress / UserStageProgress API bağlantılarını yönetir.
+/// Sahneye eklenmez; uygulama açılırken otomatik oluşur ve sahneler arasında kalır.
 /// </summary>
 public class GameApiClient : MonoBehaviour
 {
     public static GameApiClient Instance { get; private set; }
 
-    // TODO: Login akışı eklendiğinde userId, giriş yapan kullanıcıdan gelecek.
-    // Şimdilik Postman testlerindeki sabit test kullanıcısıyla aynı.
-    private const int TestUserId = 3;
-    private const string BaseUrl = "https://localhost:5001";
+    [Header("API")]
+    public static string BaseUrl = "http://192.168.1.104:5001";
+
+    public int UserId => AppSession.UserId;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Bootstrap()
     {
         if (Instance != null)
-        {
             return;
-        }
 
         GameObject host = new GameObject("GameApiClient");
         host.AddComponent<GameApiClient>();
@@ -43,59 +40,220 @@ public class GameApiClient : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public int UserId => TestUserId;
-
-    // ─── PUBLIC API ──────────────────────────────────────────────────────────
-
     public void StartGame(Action<bool> onComplete)
     {
-        string url = $"{BaseUrl}/api/game/users/{TestUserId}/start";
-        StartCoroutine(SendRequest(UnityWebRequest.kHttpVerbPOST, url, (success, _) => onComplete?.Invoke(success)));
+        if (!TryGetUserId(out int userId, onComplete))
+            return;
+
+        string url =
+            $"{BaseUrl.TrimEnd('/')}/api/game/users/{userId}/start";
+
+        StartCoroutine(
+            SendRequest(
+                UnityWebRequest.kHttpVerbPOST,
+                url,
+                (success, body) =>
+                {
+                    bool apiSuccess =
+                        success && ReadIsSuccess(body);
+
+                    onComplete?.Invoke(apiSuccess);
+                }
+            )
+        );
     }
 
-    public void GetProgress(Action<bool, GameProgressSnapshot> onComplete)
+    public void GetProgress(
+        Action<bool, GameProgressSnapshot> onComplete
+    )
     {
-        string url = $"{BaseUrl}/api/game/users/{TestUserId}";
-        StartCoroutine(SendRequest(UnityWebRequest.kHttpVerbGET, url, (success, body) =>
+        if (AppSession.UserId <= 0)
         {
-            GameProgressSnapshot snapshot = success ? ParseProgress(body) : new GameProgressSnapshot();
-            onComplete?.Invoke(success, snapshot);
-        }));
+            Debug.LogError(
+                "[GameApiClient] Geçerli kullanıcı oturumu bulunamadı."
+            );
+
+            onComplete?.Invoke(
+                false,
+                new GameProgressSnapshot()
+            );
+
+            return;
+        }
+
+        string url =
+            $"{BaseUrl.TrimEnd('/')}/api/game/users/{AppSession.UserId}";
+
+        StartCoroutine(
+            SendRequest(
+                UnityWebRequest.kHttpVerbGET,
+                url,
+                (success, body) =>
+                {
+                    bool apiSuccess =
+                        success && ReadIsSuccess(body);
+
+                    GameProgressSnapshot snapshot =
+                        apiSuccess
+                            ? ParseProgress(body)
+                            : new GameProgressSnapshot();
+
+                    onComplete?.Invoke(
+                        apiSuccess,
+                        snapshot
+                    );
+                }
+            )
+        );
     }
 
-    public void StartStage(int stageId, Action<bool> onComplete)
+    public void StartStage(
+        int stageId,
+        Action<bool> onComplete
+    )
     {
-        string url = $"{BaseUrl}/api/game/users/{TestUserId}/stages/{stageId}/start";
-        StartCoroutine(SendRequest(UnityWebRequest.kHttpVerbPOST, url, (success, _) => onComplete?.Invoke(success)));
+        if (!TryGetUserId(out int userId, onComplete))
+            return;
+
+        string url =
+            $"{BaseUrl.TrimEnd('/')}/api/game/users/{userId}/stages/{stageId}/start";
+
+        StartCoroutine(
+            SendRequest(
+                UnityWebRequest.kHttpVerbPOST,
+                url,
+                (success, body) =>
+                {
+                    bool apiSuccess =
+                        success && ReadIsSuccess(body);
+
+                    onComplete?.Invoke(apiSuccess);
+                }
+            )
+        );
     }
 
-    public void RetryStage(int stageId, Action<bool> onComplete)
+    public void RetryStage(
+        int stageId,
+        Action<bool> onComplete
+    )
     {
-        string url = $"{BaseUrl}/api/game/users/{TestUserId}/stages/{stageId}/retry";
-        StartCoroutine(SendRequest(UnityWebRequest.kHttpVerbPOST, url, (success, _) => onComplete?.Invoke(success)));
+        if (!TryGetUserId(out int userId, onComplete))
+            return;
+
+        string url =
+            $"{BaseUrl.TrimEnd('/')}/api/game/users/{userId}/stages/{stageId}/retry";
+
+        StartCoroutine(
+            SendRequest(
+                UnityWebRequest.kHttpVerbPOST,
+                url,
+                (success, body) =>
+                {
+                    bool apiSuccess =
+                        success && ReadIsSuccess(body);
+
+                    onComplete?.Invoke(apiSuccess);
+                }
+            )
+        );
     }
 
-    public void CompleteStage(int stageId, Action<bool> onComplete)
+    public void CompleteStage(
+        int stageId,
+        Action<bool> onComplete
+    )
     {
-        string url = $"{BaseUrl}/api/game/users/{TestUserId}/stages/{stageId}/completestage";
-        StartCoroutine(SendRequest(UnityWebRequest.kHttpVerbPOST, url, (success, _) => onComplete?.Invoke(success)));
+        if (!TryGetUserId(out int userId, onComplete))
+            return;
+
+        string url =
+            $"{BaseUrl.TrimEnd('/')}/api/game/users/{userId}/stages/{stageId}/completestage";
+
+        StartCoroutine(
+            SendRequest(
+                UnityWebRequest.kHttpVerbPOST,
+                url,
+                (success, body) =>
+                {
+                    bool apiSuccess =
+                        success && ReadIsSuccess(body);
+
+                    onComplete?.Invoke(apiSuccess);
+                }
+            )
+        );
     }
 
     public void CompleteGame(Action<bool> onComplete)
     {
-        string url = $"{BaseUrl}/api/game/users/{TestUserId}/completegamefinal";
-        StartCoroutine(SendRequest(UnityWebRequest.kHttpVerbPOST, url, (success, _) => onComplete?.Invoke(success)));
+        if (!TryGetUserId(out int userId, onComplete))
+            return;
+
+        string url =
+            $"{BaseUrl.TrimEnd('/')}/api/game/users/{userId}/completegamefinal";
+
+        StartCoroutine(
+            SendRequest(
+                UnityWebRequest.kHttpVerbPOST,
+                url,
+                (success, body) =>
+                {
+                    bool apiSuccess =
+                        success && ReadIsSuccess(body);
+
+                    onComplete?.Invoke(apiSuccess);
+                }
+            )
+        );
     }
 
     public void MarkReentered(Action<bool> onComplete)
     {
-        string url = $"{BaseUrl}/api/game/users/{TestUserId}/reentered";
-        StartCoroutine(SendRequest(UnityWebRequest.kHttpVerbPOST, url, (success, _) => onComplete?.Invoke(success)));
+        if (!TryGetUserId(out int userId, onComplete))
+            return;
+
+        string url =
+            $"{BaseUrl.TrimEnd('/')}/api/game/users/{userId}/reentered";
+
+        StartCoroutine(
+            SendRequest(
+                UnityWebRequest.kHttpVerbPOST,
+                url,
+                (success, body) =>
+                {
+                    bool apiSuccess =
+                        success && ReadIsSuccess(body);
+
+                    onComplete?.Invoke(apiSuccess);
+                }
+            )
+        );
     }
 
-    // ─── HTTP ────────────────────────────────────────────────────────────────
+    private bool TryGetUserId(
+        out int userId,
+        Action<bool> onComplete
+    )
+    {
+        userId = AppSession.UserId;
 
-    private IEnumerator SendRequest(string method, string url, Action<bool, string> onComplete)
+        if (userId > 0)
+            return true;
+
+        Debug.LogError(
+            "[GameApiClient] Geçerli kullanıcı oturumu bulunamadı."
+        );
+
+        onComplete?.Invoke(false);
+        return false;
+    }
+
+    private IEnumerator SendRequest(
+        string method,
+        string url,
+        Action<bool, string> onComplete
+    )
     {
         UnityWebRequest request;
 
@@ -105,177 +263,210 @@ public class GameApiClient : MonoBehaviour
         }
         else
         {
-            request = new UnityWebRequest(url, method)
-            {
-                downloadHandler = new DownloadHandlerBuffer()
-            };
+            request = new UnityWebRequest(url, method);
+            request.downloadHandler =
+                new DownloadHandlerBuffer();
         }
 
-        // Yerel geliştirme sunucusu (localhost) genelde self-signed HTTPS sertifikası kullanır.
-        // Bu bypass SADECE localhost/127.0.0.1 hedeflerinde aktif olur, üretim sunucusuna karşı kullanılmamalıdır.
+        request.timeout = 20;
+
         if (IsLocalDevUrl(url))
         {
-            request.certificateHandler = new AcceptAllCertificatesHandler();
+            request.certificateHandler =
+                new AcceptAllCertificatesHandler();
         }
 
         using (request)
         {
             yield return request.SendWebRequest();
 
-            bool success = request.result == UnityWebRequest.Result.Success;
-            string body = request.downloadHandler != null ? request.downloadHandler.text : string.Empty;
+            string body =
+                request.downloadHandler != null
+                    ? request.downloadHandler.text
+                    : string.Empty;
 
-            if (!success)
-            {
-                Debug.LogError(
-                    $"[GameApiClient] {method} {url} başarısız: {request.error}\n" +
-                    $"Yanıt: {body}"
-                );
-            }
-            else
-            {
-                Debug.Log($"[GameApiClient] {method} {url} -> {request.responseCode}");
-            }
+            bool transportSuccess =
+                request.result ==
+                UnityWebRequest.Result.Success;
 
-            onComplete?.Invoke(success, body);
+            Debug.Log(
+                $"[GameApiClient] {method} {url}\n" +
+                $"Result: {request.result}\n" +
+                $"HTTP: {request.responseCode}\n" +
+                $"Error: {request.error}\n" +
+                $"Body:\n{body}"
+            );
+
+            onComplete?.Invoke(
+                transportSuccess,
+                body
+            );
         }
     }
 
-    private static bool IsLocalDevUrl(string url)
+    private static bool ReadIsSuccess(string json)
     {
-        return url.Contains("localhost") || url.Contains("127.0.0.1");
-    }
-
-    private sealed class AcceptAllCertificatesHandler : CertificateHandler
-    {
-        protected override bool ValidateCertificate(byte[] certificateData) => true;
-    }
-
-    // ─── JSON PARSE (şema onaylanana kadar esnek/tahmini okuma) ───────────────
-
-    private static GameProgressSnapshot ParseProgress(string json)
-    {
-        var snapshot = new GameProgressSnapshot();
-
         if (string.IsNullOrWhiteSpace(json))
-        {
-            return snapshot;
-        }
-
-        JObject root;
+            return false;
 
         try
         {
-            root = JObject.Parse(json);
+            JObject root = JObject.Parse(json);
+
+            JToken token =
+                root.GetValue(
+                    "isSuccess",
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+            return token != null &&
+                   token.Type == JTokenType.Boolean &&
+                   token.Value<bool>();
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
             Debug.LogError(
-                $"[GameApiClient] İlerleme JSON'ı parse edilemedi: {e.Message}\n" +
-                $"Ham yanıt: {json}"
+                "[GameApiClient] isSuccess okunamadı: " +
+                exception.Message
             );
 
-            return snapshot;
+            return false;
         }
+    }
 
-        snapshot.IsGameCompleted = ReadBool(root, "isCompleted", "IsCompleted", "completed", "Completed");
+    private static GameProgressSnapshot ParseProgress(
+        string json
+    )
+    {
+        GameProgressSnapshot snapshot =
+            new GameProgressSnapshot();
 
-        JArray stages = FindArray(root, "stages", "Stages", "userStageProgresses", "UserStageProgresses");
+        if (string.IsNullOrWhiteSpace(json))
+            return snapshot;
 
-        if (stages == null)
+        try
         {
-            Debug.LogWarning(
-                "[GameApiClient] İlerleme yanıtında aşama listesi bulunamadı. " +
-                "Alan adları tahmin edilenden farklı olabilir (bkz. GameApiClient.ParseProgress). " +
-                $"Ham yanıt: {json}"
+            JObject root = JObject.Parse(json);
+
+            JObject data =
+                root["data"] as JObject;
+
+            if (data == null)
+            {
+                Debug.LogError(
+                    "[GameApiClient] Progress cevabında data alanı bulunamadı."
+                );
+
+                return snapshot;
+            }
+
+            snapshot.GameProgressId =
+                data.Value<int?>("id") ?? 0;
+
+            snapshot.UserId =
+                data.Value<int?>("userId") ?? 0;
+
+            snapshot.IsGameCompleted =
+                data.Value<bool?>("isCompleted") ?? false;
+
+            snapshot.ReenteredAfterCompletion =
+                data.Value<bool?>(
+                    "reenteredAfterCompletion"
+                ) ?? false;
+
+            snapshot.CompletedStageCount =
+                data.Value<int?>(
+                    "completedStageCount"
+                ) ?? 0;
+
+            snapshot.StartedAtUtc =
+                data.Value<string>(
+                    "startedAtUtc"
+                );
+
+            snapshot.CompletedAtUtc =
+                data.Value<string>(
+                    "completedAtUtc"
+                );
+
+            JArray stages =
+                data["stages"] as JArray;
+
+            if (stages == null)
+                return snapshot;
+
+            foreach (JToken token in stages)
+            {
+                if (token is not JObject stageObject)
+                    continue;
+
+                int stageId =
+                    stageObject.Value<int?>(
+                        "stageId"
+                    ) ?? 0;
+
+                if (stageId <= 0)
+                    continue;
+
+                bool isCompleted =
+                    stageObject.Value<bool?>(
+                        "isCompleted"
+                    ) ?? false;
+
+                snapshot.StageStarted[stageId] =
+                    true;
+
+                snapshot.StageCompleted[stageId] =
+                    isCompleted;
+            }
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError(
+                "[GameApiClient] Progress JSON parse hatası: " +
+                exception.Message +
+                "\nHam cevap:\n" +
+                json
             );
-
-            return snapshot;
-        }
-
-        foreach (JToken token in stages)
-        {
-            if (token is not JObject stageObj)
-            {
-                continue;
-            }
-
-            int? stageId = ReadInt(stageObj, "stageId", "StageId", "stageNumber", "StageNumber");
-
-            if (stageId == null)
-            {
-                continue;
-            }
-
-            bool completed =
-                ReadBool(stageObj, "isCompleted", "IsCompleted") ||
-                ReadNonNullValue(stageObj, "completedAt", "CompletedAt");
-
-            snapshot.StageStarted[stageId.Value] = true;
-            snapshot.StageCompleted[stageId.Value] = completed;
         }
 
         return snapshot;
     }
 
-    private static JToken FindToken(JObject obj, params string[] candidateNames)
+    private static bool IsLocalDevUrl(string url)
     {
-        foreach (string name in candidateNames)
-        {
-            JToken token = obj.GetValue(name, StringComparison.OrdinalIgnoreCase);
-
-            if (token != null && token.Type != JTokenType.Null)
-            {
-                return token;
-            }
-        }
-
-        return null;
+        return
+            url.Contains("localhost") ||
+            url.Contains("127.0.0.1");
     }
 
-    private static bool ReadBool(JObject obj, params string[] names)
+    private sealed class AcceptAllCertificatesHandler
+        : CertificateHandler
     {
-        JToken token = FindToken(obj, names);
-        return token != null && token.Type == JTokenType.Boolean && token.Value<bool>();
-    }
-
-    private static int? ReadInt(JObject obj, params string[] names)
-    {
-        JToken token = FindToken(obj, names);
-
-        if (token == null)
+        protected override bool ValidateCertificate(
+            byte[] certificateData
+        )
         {
-            return null;
+            return true;
         }
-
-        try
-        {
-            return token.Value<int>();
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static bool ReadNonNullValue(JObject obj, params string[] names)
-    {
-        return FindToken(obj, names) != null;
-    }
-
-    private static JArray FindArray(JObject obj, params string[] names)
-    {
-        return FindToken(obj, names) as JArray;
     }
 }
 
-/// <summary>
-/// GET /api/game/users/{userId} yanıtının, oyunun ihtiyaç duyduğu kısmına indirgenmiş hâli.
-/// Alan adları henüz gerçek şemayla doğrulanmadı; bkz. GameApiClient.ParseProgress.
-/// </summary>
 public class GameProgressSnapshot
 {
+    public int GameProgressId;
+    public int UserId;
     public bool IsGameCompleted;
-    public readonly Dictionary<int, bool> StageStarted = new Dictionary<int, bool>();
-    public readonly Dictionary<int, bool> StageCompleted = new Dictionary<int, bool>();
+    public bool ReenteredAfterCompletion;
+    public int CompletedStageCount;
+    public string StartedAtUtc;
+    public string CompletedAtUtc;
+
+    public readonly Dictionary<int, bool>
+        StageStarted =
+            new Dictionary<int, bool>();
+
+    public readonly Dictionary<int, bool>
+        StageCompleted =
+            new Dictionary<int, bool>();
 }

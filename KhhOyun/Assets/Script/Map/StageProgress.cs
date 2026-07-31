@@ -2,221 +2,321 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Aşama ilerlemesinin oturum içi (in-memory) önbelleği ve sunucu API'siyle köprüsü.
-/// Sunucu tek doğruluk kaynağıdır: PlayerPrefs kullanılmaz. Map sahnesi StageProgress.Initialize
-/// ile taze veriyi çekmeden kilit/açık kararı vermez; aşama yöneticileri ise EnterStage/CompleteStage
-/// üzerinden sunucuyu (kısa gecikmeyi oyuncuya hissettirmeden) günceller.
-/// </summary>
 public static class StageProgress
 {
     public const int TotalStageCount = 7;
 
-    private static readonly Dictionary<int, bool> _started = new Dictionary<int, bool>();
-    private static readonly Dictionary<int, bool> _completed = new Dictionary<int, bool>();
+    private static readonly Dictionary<int, bool>
+        StartedStages =
+            new Dictionary<int, bool>();
 
-    private static bool _isGameCompleted;
-    private static bool _reenteredSentThisSession;
+    private static readonly Dictionary<int, bool>
+        CompletedStages =
+            new Dictionary<int, bool>();
 
-    public static int HighestCompletedStage
+    private static int completedStageCount;
+    private static bool isGameCompleted;
+    private static bool reenteredSentThisSession;
+
+    public static int HighestCompletedStage =>
+        Mathf.Clamp(
+            completedStageCount,
+            0,
+            TotalStageCount
+        );
+
+    public static int CurrentStage
     {
         get
         {
-            int highest = 0;
+            if (HighestCompletedStage >= TotalStageCount)
+                return TotalStageCount;
 
-            for (int stage = 1; stage <= TotalStageCount; stage++)
-            {
-                if (_completed.TryGetValue(stage, out bool done) && done)
-                {
-                    highest = stage;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return highest;
+            return HighestCompletedStage + 1;
         }
     }
 
-    public static int CurrentStage => HighestCompletedStage + 1;
-
-    /// <summary>
-    /// Oyunu (varsa mevcut kaydı) başlatır ve güncel ilerlemeyi sunucudan çeker.
-    /// Map sahnesinin Start() metodunda, aşama kilit durumları çizilmeden önce çağrılmalıdır.
-    /// </summary>
-    public static void Initialize(Action onReady, Action<string> onError = null)
+    public static void Initialize(
+        Action onReady,
+        Action<string> onError = null
+    )
     {
         if (GameApiClient.Instance == null)
         {
-            Debug.LogError("[StageProgress] GameApiClient bulunamadı.");
-            onError?.Invoke("Sunucu bağlantısı kurulamadı.");
-            return;
-        }
-
-        GameApiClient.Instance.StartGame(startSuccess =>
-        {
-            if (!startSuccess)
-            {
-                onError?.Invoke("Sunucuya bağlanılamadı. Lütfen tekrar deneyin.");
-                return;
-            }
-
-            GameApiClient.Instance.GetProgress((getSuccess, snapshot) =>
-            {
-                if (!getSuccess)
-                {
-                    onError?.Invoke("İlerleme bilgisi alınamadı. Lütfen tekrar deneyin.");
-                    return;
-                }
-
-                ApplySnapshot(snapshot);
-
-                if (_isGameCompleted && !_reenteredSentThisSession)
-                {
-                    _reenteredSentThisSession = true;
-
-                    GameApiClient.Instance.MarkReentered(success =>
-                    {
-                        if (!success)
-                        {
-                            Debug.LogWarning("[StageProgress] Yeniden giriş sunucuya iletilemedi.");
-                        }
-                    });
-                }
-
-                onReady?.Invoke();
-            });
-        });
-    }
-
-    private static void ApplySnapshot(GameProgressSnapshot snapshot)
-    {
-        _isGameCompleted = snapshot.IsGameCompleted;
-
-        foreach (KeyValuePair<int, bool> pair in snapshot.StageStarted)
-        {
-            _started[pair.Key] = pair.Value;
-        }
-
-        foreach (KeyValuePair<int, bool> pair in snapshot.StageCompleted)
-        {
-            _completed[pair.Key] = pair.Value;
-        }
-    }
-
-    /// <summary>
-    /// Bir aşama sahnesi açıldığında çağrılır. Önbelleğe göre start ya da retry gönderir
-    /// (fire-and-forget — aşamanın eğitim/oyun akışı network'ü beklemez).
-    /// </summary>
-    public static void EnterStage(int stageNumber)
-    {
-        if (GameApiClient.Instance == null)
-        {
-            Debug.LogError("[StageProgress] GameApiClient bulunamadı, EnterStage atlanıyor.");
-            return;
-        }
-
-        bool alreadyStarted = _started.TryGetValue(stageNumber, out bool started) && started;
-        bool alreadyCompleted = _completed.TryGetValue(stageNumber, out bool completed) && completed;
-
-        if (alreadyStarted && !alreadyCompleted)
-        {
-            GameApiClient.Instance.RetryStage(stageNumber, success =>
-            {
-                if (!success)
-                {
-                    Debug.LogWarning($"[StageProgress] {stageNumber}. aşama için retry sunucuya iletilemedi.");
-                }
-            });
-        }
-        else
-        {
-            GameApiClient.Instance.StartStage(stageNumber, success =>
-            {
-                if (!success)
-                {
-                    Debug.LogWarning($"[StageProgress] {stageNumber}. aşama için start sunucuya iletilemedi.");
-                }
-            });
-        }
-
-        _started[stageNumber] = true;
-    }
-
-    /// <summary>
-    /// Bir aşama tamamlandığında çağrılır (imza mevcut çağrı noktalarıyla aynı kalır).
-    /// Önbellek hemen (iyimser) güncellenir; sunucu çağrısı arka planda yapılır.
-    /// </summary>
-    public static void CompleteStage(int stageNumber)
-    {
-        int highestCompleted = HighestCompletedStage;
-
-        if (stageNumber <= highestCompleted)
-        {
-            Debug.Log($"{stageNumber}. aşama daha önce tamamlanmış.");
-            return;
-        }
-
-        if (stageNumber != highestCompleted + 1)
-        {
-            Debug.LogWarning(
-                $"Aşama sırası atlanamaz. Beklenen aşama: {highestCompleted + 1}, " +
-                $"tamamlanmak istenen aşama: {stageNumber}"
+            onError?.Invoke(
+                "Sunucu bağlantısı kurulamadı."
             );
 
             return;
         }
 
-        _started[stageNumber] = true;
-        _completed[stageNumber] = true;
+        GameApiClient.Instance.StartGame(
+            startSuccess =>
+            {
+                if (!startSuccess)
+                {
+                    onError?.Invoke(
+                        "Oyun başlatılamadı."
+                    );
 
-        Debug.Log($"{stageNumber}. aşama tamamlandı ve kaydedildi.");
+                    return;
+                }
 
+                GameApiClient.Instance.GetProgress(
+                    (getSuccess, snapshot) =>
+                    {
+                        if (!getSuccess)
+                        {
+                            onError?.Invoke(
+                                "İlerleme bilgisi alınamadı."
+                            );
+
+                            return;
+                        }
+
+                        ApplySnapshot(snapshot);
+
+                        if (
+                            isGameCompleted &&
+                            !reenteredSentThisSession
+                        )
+                        {
+                            reenteredSentThisSession =
+                                true;
+
+                            GameApiClient.Instance
+                                .MarkReentered(
+                                    success =>
+                                    {
+                                        if (!success)
+                                        {
+                                            Debug.LogWarning(
+                                                "[StageProgress] Yeniden giriş kaydedilemedi."
+                                            );
+                                        }
+                                    }
+                                );
+                        }
+
+                        onReady?.Invoke();
+                    }
+                );
+            }
+        );
+    }
+
+    private static void ApplySnapshot(
+        GameProgressSnapshot snapshot
+    )
+    {
+        StartedStages.Clear();
+        CompletedStages.Clear();
+
+        isGameCompleted =
+            snapshot.IsGameCompleted;
+
+        completedStageCount =
+            Mathf.Clamp(
+                snapshot.CompletedStageCount,
+                0,
+                TotalStageCount
+            );
+
+        foreach (
+            KeyValuePair<int, bool> pair
+            in snapshot.StageStarted
+        )
+        {
+            StartedStages[pair.Key] =
+                pair.Value;
+        }
+
+        foreach (
+            KeyValuePair<int, bool> pair
+            in snapshot.StageCompleted
+        )
+        {
+            CompletedStages[pair.Key] =
+                pair.Value;
+        }
+
+        Debug.Log(
+            $"[StageProgress] Sunucu ilerlemesi uygulandı. " +
+            $"Tamamlanan aşama sayısı: {completedStageCount}"
+        );
+    }
+
+    public static void EnterStage(int stageNumber)
+    {
         if (GameApiClient.Instance == null)
         {
-            Debug.LogError("[StageProgress] GameApiClient bulunamadı, tamamlanma sunucuya iletilemedi.");
+            Debug.LogError(
+                "[StageProgress] GameApiClient bulunamadı."
+            );
+
             return;
         }
 
-        GameApiClient.Instance.CompleteStage(stageNumber, success =>
-        {
-            if (!success)
-            {
-                Debug.LogError($"[StageProgress] {stageNumber}. aşama sunucuya iletilemedi.");
-                return;
-            }
+        bool wasOpenedBefore =
+            StartedStages.TryGetValue(
+                stageNumber,
+                out bool started
+            ) && started;
 
-            if (stageNumber >= TotalStageCount)
-            {
-                GameApiClient.Instance.CompleteGame(gameSuccess =>
+        if (wasOpenedBefore)
+        {
+            GameApiClient.Instance.RetryStage(
+                stageNumber,
+                success =>
                 {
-                    if (gameSuccess)
+                    if (!success)
                     {
-                        _isGameCompleted = true;
-                        Debug.Log("[StageProgress] Oyun tamamlandı ve kaydedildi.");
+                        Debug.LogError(
+                            $"[StageProgress] {stageNumber}. aşama retry API başarısız."
+                        );
+
+                        return;
                     }
-                    else
-                    {
-                        Debug.LogWarning("[StageProgress] Oyun tamamlama sunucuya iletilemedi.");
-                    }
-                });
+
+                    Debug.Log(
+                        $"[StageProgress] {stageNumber}. aşama yeniden açıldı. " +
+                        "Retry sayısı artırıldı."
+                    );
+                }
+            );
+
+            return;
+        }
+
+        GameApiClient.Instance.StartStage(
+            stageNumber,
+            success =>
+            {
+                if (!success)
+                {
+                    Debug.LogError(
+                        $"[StageProgress] {stageNumber}. aşama start API başarısız."
+                    );
+
+                    return;
+                }
+
+                StartedStages[stageNumber] = true;
+
+                Debug.Log(
+                    $"[StageProgress] {stageNumber}. aşama ilk kez açıldı."
+                );
             }
-        });
+        );
     }
 
-    /// <summary>
-    /// Yalnızca yerel oturum önbelleğini sıfırlar (dev/editor kısayolu).
-    /// Sunucudaki kayıtları etkilemez.
-    /// </summary>
+    public static void CompleteStage(
+     int stageNumber,
+     Action<bool> onComplete = null
+ )
+    {
+        if (stageNumber < 1 ||
+            stageNumber > TotalStageCount)
+        {
+            Debug.LogError(
+                $"Geçersiz aşama numarası: {stageNumber}"
+            );
+
+            onComplete?.Invoke(false);
+            return;
+        }
+
+        if (GameApiClient.Instance == null)
+        {
+            Debug.LogError(
+                "[StageProgress] GameApiClient bulunamadı."
+            );
+
+            onComplete?.Invoke(false);
+            return;
+        }
+
+        GameApiClient.Instance.CompleteStage(
+            stageNumber,
+            success =>
+            {
+                if (!success)
+                {
+                    Debug.LogError(
+                        $"[StageProgress] {stageNumber}. aşama tamamlanamadı."
+                    );
+
+                    onComplete?.Invoke(false);
+                    return;
+                }
+
+                StartedStages[stageNumber] = true;
+                CompletedStages[stageNumber] = true;
+
+                completedStageCount =
+                    Mathf.Max(
+                        completedStageCount,
+                        stageNumber
+                    );
+
+                Debug.Log(
+                    $"[StageProgress] {stageNumber}. aşama tamamlandı."
+                );
+
+                if (stageNumber >= TotalStageCount)
+                {
+                    GameApiClient.Instance.CompleteGame(
+                        gameSuccess =>
+                        {
+                            if (gameSuccess)
+                            {
+                                isGameCompleted = true;
+                            }
+
+                            onComplete?.Invoke(true);
+                        }
+                    );
+
+                    return;
+                }
+
+                onComplete?.Invoke(true);
+            }
+        );
+    }
+
+    public static void RetryStage(
+        int stageNumber
+    )
+    {
+        if (GameApiClient.Instance == null)
+            return;
+
+        GameApiClient.Instance.RetryStage(
+            stageNumber,
+            success =>
+            {
+                if (!success)
+                {
+                    Debug.LogWarning(
+                        $"[StageProgress] {stageNumber}. aşama retry kaydedilemedi."
+                    );
+                }
+            }
+        );
+    }
+
     public static void ResetProgress()
     {
-        _started.Clear();
-        _completed.Clear();
-        _isGameCompleted = false;
-        _reenteredSentThisSession = false;
+        StartedStages.Clear();
+        CompletedStages.Clear();
 
-        Debug.Log("[StageProgress] Yerel oturum ilerlemesi sıfırlandı (sunucudaki kayıtlar etkilenmez).");
+        completedStageCount = 0;
+        isGameCompleted = false;
+        reenteredSentThisSession = false;
+
+        Debug.Log(
+            "[StageProgress] Yerel önbellek sıfırlandı."
+        );
     }
 }

@@ -9,16 +9,16 @@ public class Stage1RoomManager : MonoBehaviour
     [Header("UI")]
     public TMP_Text messageText;
 
-    [Header("E�itim")]
-    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bile�eni.")]
+    [Header("Eğitim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileşeni.")]
     public EducationPanelUI educationPanelUI;
 
-    [Tooltip("EducationPanelUI i�indeki Steps listesinde kullan�lacak ad�m kimli�i.")]
+    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanılacak adım kimliği.")]
     [SerializeField]
     private string educationStepId = "asama1_egitim";
 
-    [Header("Sahne ��eri�i")]
-    [Tooltip("E�itim tamamlanana kadar kapal� kalacak Sahne objesi.")]
+    [Header("Sahne İçeriği")]
+    [Tooltip("Eğitim tamamlanana kadar kapalı kalacak Sahne objesi.")]
     public GameObject sceneContent;
 
     [Header("Popup")]
@@ -47,7 +47,7 @@ public class Stage1RoomManager : MonoBehaviour
     public int requiredCount = 2;
     public int currentRequiredCount = 0;
 
-    [Header("A�ama Ge�i�i")]
+    [Header("Aşama Geçişi")]
     [SerializeField] private int stageNumber = 1;
     [SerializeField] private string mapSceneName = "Map";
     [SerializeField] private float mapReturnDelay = 0.4f;
@@ -68,7 +68,7 @@ public class Stage1RoomManager : MonoBehaviour
         HideSlot(toothbrushSlotImage);
         HideSlot(toySlotImage);
 
-        // E�itim bitene kadar oyun sahnesi gizli kal�r.
+        // Eğitim bitene kadar oyun sahnesi gizli kalır.
         if (sceneContent != null)
         {
             sceneContent.SetActive(false);
@@ -76,7 +76,7 @@ public class Stage1RoomManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Stage1RoomManager: Scene Content alan�na Sahne objesi atanmad�."
+                "Stage1RoomManager: Scene Content alanına Sahne objesi atanmadı."
             );
         }
 
@@ -92,7 +92,7 @@ public class Stage1RoomManager : MonoBehaviour
         if (messageText != null)
         {
             messageText.text =
-                "�nce k�sa e�itimi dinleyelim.";
+                "Önce kısa eğitimi dinleyelim.";
         }
 
         if (educationPanelUI != null)
@@ -105,15 +105,15 @@ public class Stage1RoomManager : MonoBehaviour
         else
         {
             Debug.LogError(
-                "Stage1RoomManager: Education Panel UI alan�na " +
-                "EducationPanel �zerindeki EducationPanelUI bile�eni atanmad�."
+                "Stage1RoomManager: Education Panel UI alanına " +
+                "EducationPanel üzerindeki EducationPanelUI bileşeni atanmadı."
             );
         }
 
         educationIsOpen = false;
 
-        // Devam butonuna bas�l�p e�itim paneli kapand�ktan sonra
-        // as�l oyun sahnesi g�r�n�r h�le gelir.
+        // Devam butonuna basılıp eğitim paneli kapandıktan sonra
+        // asıl oyun sahnesi görünür hâle gelir.
         if (sceneContent != null)
         {
             sceneContent.SetActive(true);
@@ -122,11 +122,11 @@ public class Stage1RoomManager : MonoBehaviour
         if (messageText != null)
         {
             messageText.text =
-                "Merhaba! Bug�n hastane i�in �antan� haz�rlayaca��z.";
+                "Merhaba! Bugün hastane için çantanı hazırlayacağız.";
         }
 
         Debug.Log(
-            "A�ama 1 e�itimi tamamland�. Oyun ba�lad�."
+            "Aşama 1 eğitimi tamamlandı. Oyun başladı."
         );
     }
 
@@ -153,24 +153,24 @@ public class Stage1RoomManager : MonoBehaviour
 
             case "cips":
                 score -= 10;
-                ShowWarning("�imdilik abur cubur almamal�s�n.");
+                ShowWarning("Şimdilik abur cubur almamalısın.");
                 break;
 
             case "soda":
                 score -= 10;
-                ShowWarning("Gazl� i�ecekler ameliyat �ncesinde uygun de�ildir.");
+                ShowWarning("Gazlı içecekler ameliyat öncesinde uygun değildir.");
                 break;
 
             case "oyuncaklar":
                 score -= 5;
-                ShowWarning("Gereksiz oyuncaklar� yan�na almana gerek yok.");
+                ShowWarning("Gereksiz oyuncakları yanına almana gerek yok.");
                 break;
 
             case "yemek":
                 score -= 10;
 
                 ShowWarning(
-                    "Ameliyat �ncesinde yemek yasak olabilir. " +
+                    "Ameliyat öncesinde yemek yasak olabilir. " +
                     "Doktorunu dinlemelisin."
                 );
                 break;
@@ -179,7 +179,7 @@ public class Stage1RoomManager : MonoBehaviour
                 score -= 10;
 
                 ShowWarning(
-                    "Ameliyat �ncesinde su i�mek yasak olabilir. " +
+                    "Ameliyat öncesinde su içmek yasak olabilir. " +
                     "Doktorunu dinlemelisin."
                 );
                 break;
@@ -324,7 +324,7 @@ public class Stage1RoomManager : MonoBehaviour
             if (warningPopup != null)
             {
                 yield return warningPopup.ShowAndWaitForClose(
-                    "Oyunca��n� yan�na alabilirsin.\n" +
+                    "Oyuncağını yanına alabilirsin.\n" +
                     "Ama o ameliyata giremez,\n" +
                     "odanda seni bekleyecek."
                 );
@@ -334,7 +334,7 @@ public class Stage1RoomManager : MonoBehaviour
         if (warningPopup != null)
         {
             yield return warningPopup.ShowAndWaitForClose(
-                "Harikas�n!\n�antan haz�r."
+                "Harikasın!\nÇantan hazır."
             );
         }
 
@@ -350,8 +350,27 @@ public class Stage1RoomManager : MonoBehaviour
 
         isReturningToMap = true;
 
-        StageProgress.CompleteStage(stageNumber);
-        StartCoroutine(ReturnToMapRoutine());
+        StageProgress.CompleteStage(
+            stageNumber,
+            success =>
+            {
+                if (!success)
+                {
+                    isReturningToMap = false;
+
+                    ShowWarning(
+                        "Aşama ilerlemesi kaydedilemedi. " +
+                        "Lütfen tekrar deneyin."
+                    );
+
+                    return;
+                }
+
+                StartCoroutine(
+                    ReturnToMapRoutine()
+                );
+            }
+        );
     }
 
     private IEnumerator ReturnToMapRoutine()
@@ -360,13 +379,27 @@ public class Stage1RoomManager : MonoBehaviour
 
         if (string.IsNullOrWhiteSpace(mapSceneName))
         {
-            Debug.LogError("Map Scene Name alan� bo�.");
+            Debug.LogError(
+                "Map Scene Name alanı boş."
+            );
+
+            isReturningToMap = false;
+            yield break;
+        }
+
+        if (!Application.CanStreamedLevelBeLoaded(mapSceneName))
+        {
+            Debug.LogError(
+                $"'{mapSceneName}' sahnesi Build Profiles " +
+                "içindeki Scene List'te bulunamadı."
+            );
+
+            isReturningToMap = false;
             yield break;
         }
 
         SceneManager.LoadScene(mapSceneName);
     }
-
 
     private void ShowWarning(string message)
     {

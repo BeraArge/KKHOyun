@@ -5,16 +5,16 @@ using UnityEngine.UI;
 
 public class Stage5MedicineManager : MonoBehaviour
 {
-    [Header("E�itim")]
-    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bile�eni.")]
+    [Header("Eğitim")]
+    [Tooltip("Sahnedeki EducationPanel objesinin EducationPanelUI bileşeni.")]
     public EducationPanelUI educationPanel;
 
-    [Tooltip("EducationPanelUI i�indeki Steps listesinde kullan�lacak ad�m kimli�i.")]
+    [Tooltip("EducationPanelUI içindeki Steps listesinde kullanılacak adım kimliği.")]
     [SerializeField]
     private string educationStepId = "asama5_egitim1";
 
-    [Header("Sahne ��eri�i")]
-    [Tooltip("E�itim tamamlanana kadar kapal� kalacak ila� se�imi sahnesi.")]
+    [Header("Sahne İçeriği")]
+    [Tooltip("Eğitim tamamlanana kadar kapalı kalacak ilaç seçimi sahnesi.")]
     public GameObject sceneContent;
 
     [Header("Popup")]
@@ -43,7 +43,7 @@ public class Stage5MedicineManager : MonoBehaviour
     public int requiredCount = 3;
     public int currentRequiredCount = 0;
 
-    [Header("A�ama Ge�i�i")]
+    [Header("Aşama Geçişi")]
     [SerializeField]
     private int stageNumber = 5;
 
@@ -77,7 +77,7 @@ public class Stage5MedicineManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Stage5MedicineManager: Scene Content alan�na ila� se�imi sahnesi atanmad�."
+                "Stage5MedicineManager: Scene Content alanına ilaç seçimi sahnesi atanmadı."
             );
         }
 
@@ -98,7 +98,8 @@ public class Stage5MedicineManager : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Stage5MedicineManager: Education Panel atanmad�. E�itim ad�m� atlan�yor."
+                "Stage5MedicineManager: Education Panel atanmadı. " +
+                "Eğitim adımı atlanıyor."
             );
         }
 
@@ -110,7 +111,7 @@ public class Stage5MedicineManager : MonoBehaviour
         }
 
         Debug.Log(
-            "[Stage5MedicineManager] E�itim tamamland�. �la� se�imi ba�lad�."
+            "[Stage5MedicineManager] Eğitim tamamlandı. İlaç seçimi başladı."
         );
     }
 
@@ -183,8 +184,8 @@ public class Stage5MedicineManager : MonoBehaviour
                 score -= 20;
 
                 ShowWarning(
-                    "Bu ila� sana ait de�il.\n" +
-                    "Ba�kas�n�n ilac�n� kullanmamal�s�n!"
+                    "Bu ilaç sana ait değil.\n" +
+                    "Başkasının ilacını kullanmamalısın!"
                 );
 
                 break;
@@ -192,7 +193,7 @@ public class Stage5MedicineManager : MonoBehaviour
             default:
 
                 Debug.LogWarning(
-                    "Tan�ms�z ila� ad�: " +
+                    "Tanımsız ilaç adı: " +
                     medicineName
                 );
 
@@ -299,18 +300,18 @@ public class Stage5MedicineManager : MonoBehaviour
             yield return warningPopup
                 .ShowAndWaitForClose(
                     "Harika!\n" +
-                    "Do�ru ila�lar� ila� kutuna yerle�tirdin."
+                    "Doğru ilaçları ilaç kutuna yerleştirdin."
                 );
         }
         else
         {
             Debug.LogWarning(
-                "Harika! Do�ru ila�lar� ila� kutuna yerle�tirdin."
+                "Harika! Doğru ilaçları ilaç kutuna yerleştirdin."
             );
         }
 
         Debug.Log(
-            "[Stage5MedicineManager] A�ama 5 tamamland�. Skor: " +
+            "[Stage5MedicineManager] Aşama 5 tamamlandı. Skor: " +
             score
         );
 
@@ -327,11 +328,26 @@ public class Stage5MedicineManager : MonoBehaviour
         isReturningToMap = true;
 
         StageProgress.CompleteStage(
-            stageNumber
-        );
+            stageNumber,
+            success =>
+            {
+                if (!success)
+                {
+                    isReturningToMap = false;
+                    stageCompleted = false;
 
-        StartCoroutine(
-            ReturnToMapRoutine()
+                    ShowWarning(
+                        "Aşama ilerlemesi kaydedilemedi.\n" +
+                        "Lütfen internet bağlantını kontrol edip tekrar dene."
+                    );
+
+                    return;
+                }
+
+                StartCoroutine(
+                    ReturnToMapRoutine()
+                );
+            }
         );
     }
 
@@ -348,7 +364,7 @@ public class Stage5MedicineManager : MonoBehaviour
         )
         {
             Debug.LogError(
-                "[Stage5MedicineManager] Map Scene Name alan� bo�."
+                "[Stage5MedicineManager] Map Scene Name alanı boş."
             );
 
             isReturningToMap = false;
@@ -363,7 +379,7 @@ public class Stage5MedicineManager : MonoBehaviour
         {
             Debug.LogError(
                 $"[Stage5MedicineManager] '{mapSceneName}' sahnesi " +
-                "Build Profiles i�indeki Scene List'te bulunamad�."
+                "Build Profiles içindeki Scene List'te bulunamadı."
             );
 
             isReturningToMap = false;
