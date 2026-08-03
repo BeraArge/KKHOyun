@@ -3261,8 +3261,8 @@ MonoBehaviour:
   stageNumber: 2
   mapSceneName: Map
   mapReturnDelay: 0.4
-  debugSkipEnabled: 1
-  debugStartPhase: 5
+  debugSkipEnabled: 0
+  debugStartPhase: 0
 --- !u!1 &718081933
 GameObject:
   m_ObjectHideFlags: 0
@@ -4294,7 +4294,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &857776387
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8890,12 +8890,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a055f1cbe31931d449d2b373f19012b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EducationVideoManager
-  stage2Manager: {fileID: 680093704}
-  videoPlayer: {fileID: 1212314843}
-  clip: {fileID: 32900000, guid: 64da625fdeb915f43a2e3ae6a77a2898, type: 3}
-  dayTitleText: {fileID: 291761902}
-  subscribed: 0
-  completed: 0
 --- !u!1 &1875214824
 GameObject:
   m_ObjectHideFlags: 0
