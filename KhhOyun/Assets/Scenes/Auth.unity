@@ -5964,7 +5964,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97f9a348501b4dd40a44673ed76e272d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AuthUIManager
-  baseUrl: http://192.168.1.108:5000
+  baseUrl: http://84.247.20.224
   loginEndpoint: /api/auth/login
   registerEndpoint: /api/auth/register
   mapSceneName: Map
