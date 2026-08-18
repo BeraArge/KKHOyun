@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private string educationStepId = "asama7_egitim1";
 
+
     [Header("Eğitim Tıklama Engelleyici")]
     [Tooltip(
         "Eğitim sırasında Task1 içindeki meyvelerin önünde " +
@@ -22,9 +23,17 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject educationInputBlocker;
 
+
     [Header("Görev Ayarları")]
     [SerializeField]
     private int totalTasks = 5;
+
+
+    // SADECE BUNU EKLİYORUZ
+    [Header("Görev Bilgilendirme Popup")]
+    [SerializeField]
+    private WarningPopupUI warningPopup;
+
 
     [Header("Aşama Geçişi")]
     [SerializeField]
@@ -36,6 +45,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float mapReturnDelay = 0.4f;
 
+
     private int completedTasks;
 
     private bool educationIsOpen;
@@ -43,9 +53,11 @@ public class GameManager : MonoBehaviour
     private bool gameCompleted;
     private bool isReturningToMap;
 
+
     // Aynı görevin birden fazla kez sayılmasını engeller.
     private readonly HashSet<int> completedTaskIds =
         new HashSet<int>();
+
 
     private void OnEnable()
     {
@@ -53,11 +65,13 @@ public class GameManager : MonoBehaviour
             HandleTaskCompletion;
     }
 
+
     private void OnDisable()
     {
         GameEvents.OnTaskCompleted -=
             HandleTaskCompletion;
     }
+
 
     private void Start()
     {
@@ -71,13 +85,20 @@ public class GameManager : MonoBehaviour
 
         completedTaskIds.Clear();
 
+
         // Eğitim açıkken blocker aktif olur.
         SetEducationBlockerActive(true);
+
 
         StartCoroutine(
             StartEducationRoutine()
         );
     }
+
+
+    // =========================================================
+    // GENEL EĞİTİM
+    // =========================================================
 
     private IEnumerator StartEducationRoutine()
     {
@@ -96,22 +117,112 @@ public class GameManager : MonoBehaviour
             );
         }
 
+
         educationIsOpen = false;
+
+
+        // =====================================================
+        // YENİ:
+        // Genel eğitim bittikten sonra yalnızca Görev 1
+        // bilgilendirmesini gösteriyoruz.
+        // Görevin kendisine DOKUNMUYORUZ.
+        // =====================================================
+
+        if (warningPopup != null)
+        {
+            yield return warningPopup
+                .ShowAndWaitForClose(
+                    GetTaskWarningText(1)
+                );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "[GameManager] WarningPopup atanmadı."
+            );
+        }
+
+
         gameStarted = true;
 
-        // Eğitim kapandıktan sonra blocker kapanır.
+
+        // Eğitim ve popup bittikten sonra blocker kapanır.
         SetEducationBlockerActive(false);
+
 
         Debug.Log(
             "[GameManager] Aşama 7 eğitimi tamamlandı. Oyun başladı."
         );
     }
 
+
+    // =========================================================
+    // POPUP YAZILARI
+    // =========================================================
+
+    private string GetTaskWarningText(int taskId)
+    {
+        switch (taskId)
+        {
+            case 1:
+                return "Ağaçtan 5 elma topla ve sepete yerleştir. Diğer meyvelere dokunmamaya dikkat et!";
+
+            case 2:
+                return "Tansiyon aletini kullan ve ekrandaki soruyu dikkatlice cevapla. Normal kan basıncı değerini seç.";
+
+            case 3:
+                return "Alarm çaldığında karşına farklı ilaçlar çıkacak. Sadece kullanman gereken 3 ilaçı seç.";
+
+            case 4:
+                return "Besinleri doğru gruplarla eşleştir.";
+
+            case 5:
+                return "Takvimi incele ve bugünden 1 hafta sonraki kontrol gününü işaretle.";
+
+            default:
+                return "Yeni görev başlıyor. Hazırsan devam et!";
+        }
+    }
+
+
+    // =========================================================
+    // SADECE SONRAKİ POPUP'I AÇAR
+    // =========================================================
+
+    private IEnumerator ShowNextTaskWarning(
+        int taskId
+    )
+    {
+        if (warningPopup == null)
+        {
+            yield break;
+        }
+
+
+        // Popup açıkken arkaya basılmasını engelle.
+        SetEducationBlockerActive(true);
+
+
+        yield return warningPopup
+            .ShowAndWaitForClose(
+                GetTaskWarningText(taskId)
+            );
+
+
+        // Popup kapandı.
+        SetEducationBlockerActive(false);
+    }
+
+
+    // =========================================================
+    // MEVCUT GÖREV TAMAMLAMA SİSTEMİ
+    // =========================================================
+
     private void HandleTaskCompletion(
         int taskId
     )
     {
-        // Eğitim kapanmadan hiçbir görev tamamlanmış sayılmaz.
+        // BU KISIM SENİN ESKİ KODUN.
         if (
             educationIsOpen ||
             !gameStarted ||
@@ -122,6 +233,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+
         if (completedTaskIds.Contains(taskId))
         {
             Debug.Log(
@@ -131,19 +243,51 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+
         completedTaskIds.Add(taskId);
+
         completedTasks++;
+
 
         Debug.Log(
             $"Harika! Görev {taskId} bitti. " +
             $"İlerleme durumu: {completedTasks}/{totalTasks}."
         );
 
+
         if (completedTasks >= totalTasks)
         {
             CompleteStage();
+
+            return;
+        }
+
+
+        // =====================================================
+        // YENİ EKLENEN TEK MANTIK:
+        //
+        // Örneğin Task 1 kendi koduyla tamamlanınca event gelir.
+        // Burada yalnızca Görev 2 popup'ı açılır.
+        //
+        // Görev 2'yi açmıyoruz.
+        // Task1'i kapatmıyoruz.
+        // Task2'yi başlatmıyoruz.
+        // Mevcut task kodlarına karışmıyoruz.
+        // =====================================================
+
+        int nextTaskId = taskId + 1;
+
+
+        if (nextTaskId <= totalTasks)
+        {
+            StartCoroutine(
+                ShowNextTaskWarning(
+                    nextTaskId
+                )
+            );
         }
     }
+
 
     private void CompleteStage()
     {
@@ -156,16 +300,21 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+
         gameCompleted = true;
+
 
         Debug.Log(
             "Tebrikler, tüm görevleri tamamladın!"
         );
 
+
         GameEvents.OnGameWon?.Invoke();
+
 
         CompleteStageAndReturnToMap();
     }
+
 
     private void CompleteStageAndReturnToMap()
     {
@@ -174,7 +323,9 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+
         isReturningToMap = true;
+
 
         StageProgress.CompleteStage(
             stageNumber,
@@ -183,15 +334,19 @@ public class GameManager : MonoBehaviour
                 if (!success)
                 {
                     isReturningToMap = false;
+
                     gameCompleted = false;
+
 
                     Debug.LogError(
                         "[GameManager] Aşama 7 ilerlemesi " +
                         "sunucuya kaydedilemedi."
                     );
 
+
                     return;
                 }
+
 
                 StartCoroutine(
                     ReturnToMapRoutine()
@@ -200,11 +355,13 @@ public class GameManager : MonoBehaviour
         );
     }
 
+
     private IEnumerator ReturnToMapRoutine()
     {
         yield return new WaitForSecondsRealtime(
             mapReturnDelay
         );
+
 
         if (
             string.IsNullOrWhiteSpace(
@@ -216,9 +373,12 @@ public class GameManager : MonoBehaviour
                 "[GameManager] Map Scene Name alanı boş."
             );
 
+
             isReturningToMap = false;
+
             yield break;
         }
+
 
         if (
             !Application.CanStreamedLevelBeLoaded(
@@ -231,14 +391,18 @@ public class GameManager : MonoBehaviour
                 "Build Profiles içindeki Scene List'te bulunamadı."
             );
 
+
             isReturningToMap = false;
+
             yield break;
         }
+
 
         SceneManager.LoadScene(
             mapSceneName
         );
     }
+
 
     private void SetEducationBlockerActive(
         bool active
@@ -256,6 +420,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
     private void Update()
     {
         if (
@@ -269,7 +434,9 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+
         // Yalnızca test/debug amacıyla kullanılabilir.
+
         if (
             Keyboard.current.digit1Key
                 .wasPressedThisFrame
@@ -277,6 +444,7 @@ public class GameManager : MonoBehaviour
         {
             GameEvents.OnTaskCompleted?.Invoke(1);
         }
+
 
         if (
             Keyboard.current.digit2Key
@@ -286,6 +454,7 @@ public class GameManager : MonoBehaviour
             GameEvents.OnTaskCompleted?.Invoke(2);
         }
 
+
         if (
             Keyboard.current.digit3Key
                 .wasPressedThisFrame
@@ -294,6 +463,7 @@ public class GameManager : MonoBehaviour
             GameEvents.OnTaskCompleted?.Invoke(3);
         }
 
+
         if (
             Keyboard.current.digit4Key
                 .wasPressedThisFrame
@@ -301,6 +471,7 @@ public class GameManager : MonoBehaviour
         {
             GameEvents.OnTaskCompleted?.Invoke(4);
         }
+
 
         if (
             Keyboard.current.digit5Key
