@@ -75,6 +75,26 @@ public class Stage2OrderManager : MonoBehaviour
 
     private enum Phase { A, B, C, D, E, F, H }
 
+    // Bölümleri Start yerine Awake'te kapatıyoruz: sahne ilk karesini çizmeden
+    // önce kapanmaları gerekiyor, yoksa eğitim paneli açılana kadar arkadaki
+    // bölüm bir an ekranda görünüyor.
+    private void Awake()
+    {
+        if (phaseAContainer != null) phaseAContainer.SetActive(false);
+        if (phaseBContainer != null) phaseBContainer.SetActive(false);
+        if (phaseCContainer != null) phaseCContainer.SetActive(false);
+        if (phaseDContainer != null) phaseDContainer.SetActive(false);
+        if (phaseEContainer != null) phaseEContainer.SetActive(false);
+        if (phaseFContainer != null) phaseFContainer.SetActive(false);
+        if (phaseHContainer != null) phaseHContainer.SetActive(false);
+
+        if (roomSlotImages != null)
+        {
+            foreach (var img in roomSlotImages)
+                if (img != null) img.enabled = false;
+        }
+    }
+
     private void Start()
     {
         StageProgress.EnterStage(stageNumber);
@@ -85,17 +105,6 @@ public class Stage2OrderManager : MonoBehaviour
             return;
         }
 
-        if (phaseAContainer != null) phaseAContainer.SetActive(false);
-        if (phaseBContainer != null) phaseBContainer.SetActive(false);
-        if (phaseCContainer != null) phaseCContainer.SetActive(false);
-        if (phaseDContainer != null) phaseDContainer.SetActive(false);
-        if (phaseEContainer != null) phaseEContainer.SetActive(false);
-        if (phaseFContainer != null) phaseFContainer.SetActive(false);
-        if (phaseHContainer != null) phaseHContainer.SetActive(false);
-
-        foreach (var img in roomSlotImages)
-            if (img != null) img.enabled = false;
-
         if (heartDisplay != null) heartDisplay.UpdateHearts(score);
 
         StartCoroutine(IntroThenBeginPhaseA());
@@ -104,7 +113,9 @@ public class Stage2OrderManager : MonoBehaviour
     private IEnumerator IntroThenBeginPhaseA()
     {
         stageComplete = true;
-        yield return ShowEducation("intro");
+        // Sahne açılışındaki ilk eğitim panelini animasyonsuz açıyoruz ki
+        // panel belirene kadar arkadaki bölüm görünmesin.
+        yield return ShowEducation("intro", instant: true);
         stageComplete = false;
 
         if (phaseAContainer != null) phaseAContainer.SetActive(true);
@@ -113,7 +124,7 @@ public class Stage2OrderManager : MonoBehaviour
             messageText.text = "Hastanede doğru sırayı takip etmelisin!";
     }
 
-    private IEnumerator ShowEducation(string stepId)
+    private IEnumerator ShowEducation(string stepId, bool instant = false)
     {
         if (educationPanel == null)
         {
@@ -121,7 +132,7 @@ public class Stage2OrderManager : MonoBehaviour
             yield break;
         }
 
-        yield return educationPanel.ShowStepAndWaitForClose(stepId);
+        yield return educationPanel.ShowStepAndWaitForClose(stepId, instant);
     }
 
     private void DebugJumpToPhase(Phase target)

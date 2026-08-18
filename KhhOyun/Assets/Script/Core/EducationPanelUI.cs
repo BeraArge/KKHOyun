@@ -46,17 +46,27 @@ public class EducationPanelUI : MonoBehaviour
     private Coroutine continueButtonRoutine;
     private bool isOpen = false;
 
+    // Bu üç alan sahnede aynı CanvasGroup'a bağlanabiliyor. Böyle bir durumda
+    // karartma ve mesaj animasyonları panelin kendi alfasının üstüne yazıp
+    // panelin açılıp kapanıyormuş gibi titremesine yol açar. Ayrı katman
+    // yoksa o animasyonları hiç uygulamıyoruz.
+    private bool HasFeedbackLayer =>
+        feedbackCanvasGroup != null && feedbackCanvasGroup != popupCanvasGroup;
+
+    private bool HasMessageLayer =>
+        messageCanvasGroup != null && messageCanvasGroup != popupCanvasGroup;
+
     private void Awake()
     {
         HideInstant();
     }
 
-    public void Show(string message, AudioClip clip = null)
+    public void Show(string message, AudioClip clip = null, bool instant = false)
     {
         if (routine != null)
             StopCoroutine(routine);
 
-        routine = StartCoroutine(ShowRoutine(message, clip));
+        routine = StartCoroutine(ShowRoutine(message, clip, instant));
     }
 
     public void Close()
@@ -76,7 +86,7 @@ public class EducationPanelUI : MonoBehaviour
         popupCanvasGroup.blocksRaycasts = false;
         popupCanvasGroup.interactable = false;
 
-        if (feedbackCanvasGroup != null)
+        if (HasFeedbackLayer)
         {
             feedbackCanvasGroup.alpha = 0f;
             feedbackCanvasGroup.blocksRaycasts = false;
@@ -86,7 +96,9 @@ public class EducationPanelUI : MonoBehaviour
         popupRect.localScale = Vector3.zero;
 
         messageText.text = "";
-        messageCanvasGroup.alpha = 0f;
+
+        if (HasMessageLayer)
+            messageCanvasGroup.alpha = 0f;
 
         if (audioSource != null)
             audioSource.Stop();
@@ -117,7 +129,7 @@ public class EducationPanelUI : MonoBehaviour
         }
     }
 
-    private IEnumerator ShowRoutine(string message, AudioClip clip)
+    private IEnumerator ShowRoutine(string message, AudioClip clip, bool instant)
     {
         if (isOpen)
         {
@@ -125,43 +137,54 @@ public class EducationPanelUI : MonoBehaviour
         }
 
         messageText.text = "";
-        messageCanvasGroup.alpha = 0f;
+
+        if (HasMessageLayer)
+            messageCanvasGroup.alpha = 0f;
 
         popupCanvasGroup.blocksRaycasts = true;
         popupCanvasGroup.interactable = true;
 
-        if (feedbackCanvasGroup != null)
+        if (HasFeedbackLayer)
         {
             feedbackCanvasGroup.blocksRaycasts = true;
             feedbackCanvasGroup.interactable = true;
         }
 
-        float t = 0f;
-
-        while (t < openDuration)
+        if (!instant)
         {
-            t += Time.deltaTime;
-            float p = Mathf.Clamp01(t / openDuration);
-            float eased = EaseOutBack(p);
+            float t = 0f;
 
-            popupCanvasGroup.alpha = Mathf.Lerp(0f, 1f, p);
-            popupRect.localScale = Vector3.LerpUnclamped(Vector3.zero, Vector3.one, eased);
+            while (t < openDuration)
+            {
+                t += Time.deltaTime;
+                float p = Mathf.Clamp01(t / openDuration);
+                float eased = EaseOutBack(p);
 
-            if (feedbackCanvasGroup != null)
-                feedbackCanvasGroup.alpha = Mathf.Lerp(0f, feedbackMaxAlpha, p);
+                popupCanvasGroup.alpha = Mathf.Lerp(0f, 1f, p);
+                popupRect.localScale = Vector3.LerpUnclamped(Vector3.zero, Vector3.one, eased);
 
-            yield return null;
+                if (HasFeedbackLayer)
+                    feedbackCanvasGroup.alpha = Mathf.Lerp(0f, feedbackMaxAlpha, p);
+
+                yield return null;
+            }
         }
 
         popupCanvasGroup.alpha = 1f;
         popupRect.localScale = Vector3.one;
 
-        if (feedbackCanvasGroup != null)
+        if (HasFeedbackLayer)
             feedbackCanvasGroup.alpha = feedbackMaxAlpha;
 
         messageText.text = message;
 
-        yield return FadeMessage(0f, 1f, messageFadeDuration);
+        if (HasMessageLayer)
+        {
+            if (instant)
+                messageCanvasGroup.alpha = 1f;
+            else
+                yield return FadeMessage(0f, 1f, messageFadeDuration);
+        }
 
         if (nurseImage != null && nurseFrames != null && nurseFrames.Length > 0)
             nurseImage.sprite = nurseFrames[0];
@@ -231,12 +254,13 @@ public class EducationPanelUI : MonoBehaviour
         if (continueButton != null)
             continueButton.SetActive(false);
 
-        messageCanvasGroup.alpha = 0f;
+        if (HasMessageLayer)
+            messageCanvasGroup.alpha = 0f;
 
         popupCanvasGroup.blocksRaycasts = false;
         popupCanvasGroup.interactable = false;
 
-        if (feedbackCanvasGroup != null)
+        if (HasFeedbackLayer)
         {
             feedbackCanvasGroup.blocksRaycasts = false;
             feedbackCanvasGroup.interactable = false;
@@ -246,7 +270,7 @@ public class EducationPanelUI : MonoBehaviour
         Vector3 startScale = popupRect.localScale;
 
         float startPopupAlpha = popupCanvasGroup.alpha;
-        float startFeedbackAlpha = feedbackCanvasGroup != null ? feedbackCanvasGroup.alpha : 0f;
+        float startFeedbackAlpha = HasFeedbackLayer ? feedbackCanvasGroup.alpha : 0f;
 
         while (t < closeDuration)
         {
@@ -257,7 +281,7 @@ public class EducationPanelUI : MonoBehaviour
             popupCanvasGroup.alpha = Mathf.Lerp(startPopupAlpha, 0f, p);
             popupRect.localScale = Vector3.Lerp(startScale, Vector3.zero, eased);
 
-            if (feedbackCanvasGroup != null)
+            if (HasFeedbackLayer)
                 feedbackCanvasGroup.alpha = Mathf.Lerp(startFeedbackAlpha, 0f, p);
 
             yield return null;
@@ -291,9 +315,9 @@ public class EducationPanelUI : MonoBehaviour
         return 1f + c3 * Mathf.Pow(x - 1f, 3f) + c1 * Mathf.Pow(x - 1f, 2f);
     }
 
-    public IEnumerator ShowAndWaitForClose(string message, AudioClip clip = null)
+    public IEnumerator ShowAndWaitForClose(string message, AudioClip clip = null, bool instant = false)
     {
-        Show(message, clip);
+        Show(message, clip, instant);
 
         while (!isOpen)
             yield return null;
@@ -311,7 +335,7 @@ public class EducationPanelUI : MonoBehaviour
         Show(step.message, step.audioClip);
     }
 
-    public IEnumerator ShowStepAndWaitForClose(string id)
+    public IEnumerator ShowStepAndWaitForClose(string id, bool instant = false)
     {
         Step step = FindStep(id);
         if (step == null)
@@ -320,7 +344,7 @@ public class EducationPanelUI : MonoBehaviour
             yield break;
         }
 
-        yield return ShowAndWaitForClose(step.message, step.audioClip);
+        yield return ShowAndWaitForClose(step.message, step.audioClip, instant);
     }
 
     private Step FindStep(string id)
