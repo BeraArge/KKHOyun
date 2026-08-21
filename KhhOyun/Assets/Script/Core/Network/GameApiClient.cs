@@ -14,7 +14,7 @@ public class GameApiClient : MonoBehaviour
     public static GameApiClient Instance { get; private set; }
 
     [Header("API")]
-    public static string BaseUrl = "http://84.247.20.224";
+    public static string BaseUrl = "https://heart-j.com";
 
     public int UserId => AppSession.UserId;
 
